@@ -32,10 +32,9 @@
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
         "cloudflare.cloudflare-workers-bindings",
-        "ms-vscode.vscode-typescript-next",
-        "GitHub.copilot",
-        "GitHub.copilot-chat",
-        "eamodio.gitlens"
+        "GitHub.vscode-pull-request-github",
+        "GitHub.vscode-github-actions",
+        "anthropic.claude-code"
       ],
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",

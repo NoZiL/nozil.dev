@@ -20,7 +20,10 @@ pnpm test         # vitest run (unit tests)
 pnpm e2e          # playwright test (against production build)
 ```
 
-## Stack
+## Task tracking
+
+GitHub Issues #2–#8 — one per feature PR, in implementation order.
+GitHub Project board: https://github.com/users/NoZiL/projects/2
 
 Astro 6.3.7 · Tailwind CSS 4 · TypeScript 6 · pnpm 11 via corepack · Cloudflare Pages
 
