@@ -29,7 +29,7 @@ export default defineConfig({
   output: 'static', // Astro 6 removed 'hybrid'; static is the default
   adapter: cloudflare({
     imageService: 'compile', // optimise with sharp at build time, no workerd binding
-    platformProxy: { enabled: true },
+    platformProxy: { enabled: false }, // miniflare-at-dev-startup hangs here; re-enable when bindings are needed locally
   }),
 })
 ```
