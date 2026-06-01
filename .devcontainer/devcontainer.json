@@ -1,0 +1,61 @@
+{
+  "name": "nozil.dev",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-24-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "installOhMyZshConfig": true,
+      "upgradePackages": true,
+      "username": "node"
+    }
+  },
+  "onCreateCommand": "corepack enable",
+  "postStartCommand": "pnpm install",
+  "postCreateCommand": "echo 'Dev container ready — run: pnpm dev'",
+  "forwardPorts": [4321, 8788],
+  "portsAttributes": {
+    "4321": {
+      "label": "Astro Dev Server",
+      "onAutoForward": "openPreview"
+    },
+    "8788": {
+      "label": "Wrangler Pages Dev (CF Functions)",
+      "onAutoForward": "silent"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "astro-build.astro-vscode",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "cloudflare.cloudflare-workers-bindings",
+        "GitHub.vscode-pull-request-github",
+        "GitHub.vscode-github-actions",
+        "anthropic.claude-code"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2,
+        "[astro]": {
+          "editor.defaultFormatter": "astro-build.astro-vscode"
+        },
+        "tailwindCSS.includeLanguages": {
+          "astro": "html"
+        },
+        "files.associations": {
+          "*.astro": "astro"
+        },
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  },
+  "remoteEnv": {
+    "CLOUDFLARE_ACCOUNT_ID": "${localEnv:CLOUDFLARE_ACCOUNT_ID}",
+    "CLOUDFLARE_API_TOKEN": "${localEnv:CLOUDFLARE_API_TOKEN}",
+    "RESEND_API_KEY": "${localEnv:RESEND_API_KEY}"
+  }
+}
