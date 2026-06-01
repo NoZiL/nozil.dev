@@ -41,7 +41,8 @@
         "cloudflare.cloudflare-workers-bindings",
         "GitHub.vscode-pull-request-github",
         "GitHub.vscode-github-actions",
-        "anthropic.claude-code"
+        "anthropic.claude-code",
+        "tamasfe.even-better-toml"
       ],
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",

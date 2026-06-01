@@ -1,7 +1,6 @@
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import astro from 'eslint-plugin-astro'
-import jsxA11y from 'eslint-plugin-jsx-a11y'
 
 export default [
   {
@@ -10,10 +9,8 @@ export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...astro.configs.recommended,
+  // Registers the jsx-a11y plugin + its recommended rules for .astro files.
   ...astro.configs['jsx-a11y-recommended'],
-  {
-    plugins: { 'jsx-a11y': jsxA11y },
-  },
   {
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
