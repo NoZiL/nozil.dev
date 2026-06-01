@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && NODE_OPTIONS=--dns-result-order=ipv4first astro build",
-    "preview": "wrangler dev -c dist/server/wrangler.json --port 8788",
+    "preview": "wrangler dev -c dist/server/wrangler.json --ip 127.0.0.1 --port 8788",
     "deploy": "wrangler deploy -c dist/server/wrangler.json",
     "typecheck": "astro check && tsc --noEmit",
     "lint": "eslint .",
