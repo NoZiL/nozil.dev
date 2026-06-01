@@ -41,7 +41,8 @@ jobs:
             echo "::notice::CLOUDFLARE_API_TOKEN not set — skipping preview deploy. Add repo secrets to enable."
             exit 0
           fi
-          out=$(pnpm exec wrangler versions upload -c dist/server/wrangler.json 2>&1 | tee /dev/stderr)
+          cfg=$(node scripts/cf-config.mjs)
+          out=$(pnpm exec wrangler versions upload -c "$cfg" 2>&1 | tee /dev/stderr)
           url=$(printf '%s\n' "$out" | grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' | head -1)
           echo "url=$url" >> "$GITHUB_OUTPUT"
       - name: Comment preview URL on PR
@@ -81,4 +82,4 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - run: pnpm exec wrangler deploy -c dist/server/wrangler.json
+      - run: pnpm exec wrangler deploy -c "$(node scripts/cf-config.mjs)"

@@ -40,9 +40,8 @@ Pages prerender by default. `/api/contact` opts into server rendering with
 ## wrangler.toml
 
 Hand-written config supplies name + compatibility settings. The adapter **generates**
-`main` and `[assets]` into `dist/server/wrangler.json` at build time — do **not** set them
-in the root `wrangler.toml`, or the Cloudflare Vite plugin tries to resolve `dist/` before
-the build exists.
+`main` and `[assets]` at build time — do **not** set them in the root `wrangler.toml`, or the
+Cloudflare Vite plugin tries to resolve `dist/` before the build exists.
 
 ```toml
 name = "nozil-dev"
@@ -50,11 +49,19 @@ compatibility_date = "2026-06-01"
 compatibility_flags = ["nodejs_compat"]
 ```
 
-Deploy and local preview both point at the generated config:
+The generated config's location depends on the build:
+
+- **Mixed build** (has server routes, e.g. `/api/contact`) → `dist/server/wrangler.json`
+- **Static-only build** → `dist/client/wrangler.json` (inside the assets dir, which makes
+  `wrangler dev` reload-loop)
+
+`scripts/cf-config.mjs` resolves the right path (and, for the static-only case, emits a
+relocated `dist/wrangler.json` so the config sits outside the watched assets dir). The
+preview/deploy scripts and `deploy.yml` all call it:
 
 ```bash
-pnpm deploy    # wrangler deploy -c dist/server/wrangler.json
-pnpm preview   # wrangler dev    -c dist/server/wrangler.json --port 8788
+pnpm deploy    # wrangler deploy -c "$(node scripts/cf-config.mjs)"
+pnpm preview   # wrangler dev    -c "$(node scripts/cf-config.mjs)" --ip 127.0.0.1 --port 8788
 ```
 
 ### WSL/devcontainer build note

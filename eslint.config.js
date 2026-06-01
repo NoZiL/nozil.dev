@@ -4,7 +4,12 @@ import astro from 'eslint-plugin-astro'
 
 export default [
   {
-    ignores: ['dist/', '.astro/', 'node_modules/', 'playwright-report/', 'test-results/', '**/*.d.ts'],
+    ignores: ['dist/', '.astro/', '.wrangler/', 'node_modules/', 'playwright-report/', 'test-results/', '**/*.d.ts'],
+  },
+  {
+    // Node scripts (build/deploy helpers) run in the Node runtime.
+    files: ['scripts/**/*.{js,mjs}'],
+    languageOptions: { globals: { process: 'readonly', console: 'readonly' } },
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
