@@ -75,10 +75,55 @@ this; it is harmless on CI (Ubuntu resolves `localhost` to `127.0.0.1`).
 Never commit secrets. Use `wrangler secret put <NAME>` or the CF dashboard. Local dev
 values go in `.dev.vars` (gitignored).
 
-## Preview Deployments
+## Deployment (GitHub Actions)
 
-Connect the GitHub repo to the Workers project; pushes to non-`main` branches get
-preview URLs. `main` → production (nozil.dev).
+Deploys run from `.github/workflows/deploy.yml` using `wrangler` directly:
+
+| Trigger                         | Action                     | Result                                 |
+| ------------------------------- | -------------------------- | -------------------------------------- |
+| Pull request (open/update)      | `wrangler versions upload` | Ephemeral preview URL, commented on PR |
+| Push to `main`                  | `wrangler versions upload` | New preview version (staged, not live) |
+| Manual (Actions → Run workflow) | `wrangler deploy`          | Promotes a fresh build to production   |
+
+`versions upload` uploads a new Worker version **without** shifting production traffic, and
+returns a `*.workers.dev` preview URL. Production is never deployed automatically — promote
+it deliberately via the **workflow_dispatch** button (production deploys use the `production`
+GitHub Environment, so you can add required reviewers there for an approval gate).
+
+### Required CI credentials
+
+The deploy workflow needs two **repository secrets**. Until they are set, the preview step
+skips gracefully (the job stays green).
+
+| Secret                  | Value                                                        |
+| ----------------------- | ------------------------------------------------------------ |
+| `CLOUDFLARE_API_TOKEN`  | Cloudflare API token (template: **Edit Cloudflare Workers**) |
+| `CLOUDFLARE_ACCOUNT_ID` | Account ID — CF dashboard → Workers & Pages → right sidebar  |
+
+**Create the token**: CF dashboard → My Profile → API Tokens → Create Token →
+_Edit Cloudflare Workers_ template (grants Workers Scripts:Edit + Workers KV:Edit, which the
+`SESSION` KV binding needs). Scope it to the relevant account.
+
+**Set the secrets** (never commit them) — via the GitHub UI (Settings → Secrets and variables
+→ Actions) or the CLI:
+
+```bash
+gh secret set CLOUDFLARE_API_TOKEN    # paste the token when prompted
+gh secret set CLOUDFLARE_ACCOUNT_ID   # paste the account id when prompted
+```
+
+### First deploy — create the Worker once
+
+`wrangler versions upload` requires the `nozil-dev` Worker to already exist. On a brand-new
+account, run the production path **once** to create it (locally or via the manual workflow):
+
+```bash
+pnpm build
+pnpm exec wrangler deploy -c dist/server/wrangler.json
+```
+
+After that, PR/main preview uploads work. Preview URLs also require a **workers.dev
+subdomain** enabled on the account (CF dashboard → Workers & Pages → Subdomain).
 
 ## Domain / DNS
 
