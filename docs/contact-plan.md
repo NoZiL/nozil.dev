@@ -56,7 +56,7 @@ Sending domain `nozil.dev` must be verified in Resend dashboard (SPF/DKIM record
 
 **`mailto:` links are the easiest spam vector** — any scraper that finds `<a href="mailto:...">` harvests it instantly.
 
-**Plain text** (e.g. the address as raw text in the DOM) is *better* but not safe either —
+**Plain text** (e.g. the address as raw text in the DOM) is _better_ but not safe either —
 scrapers do regex matching on page source and will still find it.
 
 **JS reveal** is the right approach: the email string is never present in the HTML source.

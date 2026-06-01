@@ -1,0 +1,3 @@
+# pnpm 11: allow native postinstall builds for these toolchain deps.
+# onlyBuiltDependencies is not honored reliably in 11.2.2, so we opt in explicitly.
+dangerouslyAllowAllBuilds: true

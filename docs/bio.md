@@ -40,17 +40,20 @@ Lead Mobile Engineer at Tennaxia · Freelance dev at nozil.dev · React Native &
 ## Skills Taxonomy
 
 ### Mobile
+
 - React Native (5 years)
 - Expo (managed + bare workflow)
 - EAS Build / EAS Submit
 
 ### Frontend
+
 - React (10 years)
 - TypeScript
 - Tailwind CSS
 - Astro / Next.js
 
 ### Backend / API
+
 - Node.js
 - GraphQL · REST
 - Elixir / Phoenix
@@ -58,6 +61,7 @@ Lead Mobile Engineer at Tennaxia · Freelance dev at nozil.dev · React Native &
 - PostgreSQL · SQLite
 
 ### DevOps & Tooling
+
 - Turborepo · pnpm workspaces
 - GitHub Actions
 - Docker · Docker Compose
@@ -65,6 +69,7 @@ Lead Mobile Engineer at Tennaxia · Freelance dev at nozil.dev · React Native &
 - Cloudflare Pages / Workers
 
 ### AI / Productivity
+
 - Claude (Anthropic)
 - Cursor / Claude Code
 

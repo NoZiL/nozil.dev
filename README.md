@@ -8,14 +8,14 @@ Personal CV and portfolio for [Nicolas Zilli](https://www.linkedin.com/in/nicola
 
 ## Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | [Astro 6](https://astro.build) |
-| Styling | [Tailwind CSS 4](https://tailwindcss.com) (CSS-first, no config file) |
-| Language | TypeScript 6 (strict) |
-| Package manager | pnpm 11 via [corepack](https://nodejs.org/api/corepack.html) |
-| Deployment | [Cloudflare Pages](https://pages.cloudflare.com) |
-| Email | [Resend](https://resend.com) |
+| Layer           | Technology                                                            |
+| --------------- | --------------------------------------------------------------------- |
+| Framework       | [Astro 6](https://astro.build)                                        |
+| Styling         | [Tailwind CSS 4](https://tailwindcss.com) (CSS-first, no config file) |
+| Language        | TypeScript 6 (strict)                                                 |
+| Package manager | pnpm 11 via [corepack](https://nodejs.org/api/corepack.html)          |
+| Deployment      | [Cloudflare Workers](https://workers.cloudflare.com)                  |
+| Email           | [Resend](https://resend.com)                                          |
 
 ---
 
@@ -46,8 +46,8 @@ pnpm dev          # → http://localhost:4321
 ```bash
 pnpm dev          # local dev server (Astro, port 4321)
 pnpm build        # type-check + production build → dist/
-pnpm preview      # preview CF Pages output locally (wrangler, port 8788)
-pnpm deploy       # deploy to Cloudflare Pages
+pnpm preview      # preview built Worker locally (wrangler dev, port 8788)
+pnpm deploy       # deploy to Cloudflare Workers (wrangler deploy)
 pnpm typecheck    # astro check + tsc --noEmit
 pnpm lint         # eslint .
 pnpm format       # prettier --write .
@@ -65,7 +65,7 @@ src/
 ├── components/     # UI components — PascalCase.astro
 ├── layouts/        # BaseLayout.astro, PageLayout.astro
 ├── pages/          # file-based routes
-│   ├── api/        # contact.ts — Cloudflare Pages Function (POST)
+│   ├── api/        # contact.ts — server route, prerender=false (POST)
 │   └── fr/         # French locale (/fr/*)
 ├── content/        # typed MDX collections: work/, projects/
 │   └── config.ts   # Zod schemas
@@ -78,14 +78,14 @@ src/
 
 ## Environment variables
 
-Set in Cloudflare Pages dashboard → Settings → Environment variables.
+Set in Cloudflare Workers dashboard → Settings → Variables (or `wrangler secret put`).
 Never committed to the repo.
 
-| Variable | Example value | Purpose |
-|----------|--------------|---------|
-| `RESEND_API_KEY` | `re_…` | Resend API key for contact form email delivery |
-| `EMAIL_FROM` | `contact@nozil.dev` | Sending address (must be verified in Resend) |
-| `EMAIL_TO` | _(set in dashboard)_ | Destination inbox |
+| Variable         | Example value        | Purpose                                        |
+| ---------------- | -------------------- | ---------------------------------------------- |
+| `RESEND_API_KEY` | `re_…`               | Resend API key for contact form email delivery |
+| `EMAIL_FROM`     | `contact@nozil.dev`  | Sending address (must be verified in Resend)   |
+| `EMAIL_TO`       | _(set in dashboard)_ | Destination inbox                              |
 
 For local development with `pnpm preview`, create a `.dev.vars` file (gitignored):
 
@@ -99,10 +99,10 @@ EMAIL_TO=your-inbox@example.com
 
 ## Deployment
 
-Cloudflare Pages is connected to this GitHub repo and deploys automatically:
+Cloudflare Workers is connected to this GitHub repo and deploys automatically:
 
 - `main` → production ([nozil.dev](https://nozil.dev))
-- Any other branch / open PR → preview (`<branch>.nozil-dev.pages.dev`)
+- Any other branch / open PR → preview deployment
 
 No manual deploy step is required. GitHub Actions runs the quality gate (lint, type-check, build, Playwright e2e) before changes can merge to `main`.
 

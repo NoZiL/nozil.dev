@@ -45,17 +45,17 @@ Tailwind v4 `@theme` tokens in `src/styles/global.css`:
 ```css
 @theme {
   /* Accent — single source used everywhere */
-  --color-accent:       var(--color-violet-600);
-  --color-accent-dark:  var(--color-violet-400);
+  --color-accent: var(--color-violet-600);
+  --color-accent-dark: var(--color-violet-400);
 
   /* Custom dark-mode surfaces not in Tailwind defaults */
-  --color-dusk-bg:      #12082b;
+  --color-dusk-bg: #12082b;
   --color-dusk-surface: #1e0a40;
-  --color-dusk-border:  #2e1065;
+  --color-dusk-border: #2e1065;
 
   /* Fonts */
-  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
 }
 ```
 
@@ -113,6 +113,7 @@ CV download links to `/cv.pdf` (build-time generated) or Google Drive fallback.
 ```
 
 Detail page:
+
 ```
 [hero image or screenshot]
 [project name + 1-para summary]

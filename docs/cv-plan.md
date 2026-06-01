@@ -15,14 +15,13 @@ title: Lead Mobile Engineer
 company: Tennaxia
 companyUrl: https://www.tennaxia.com
 startDate: 2021-01-01
-endDate: null          # null = present
+endDate: null # null = present
 location: Paris, France (remote)
-type: full-time        # full-time | freelance | contract | open-source
-logo: ./tennaxia.svg   # optional, placed in same folder
+type: full-time # full-time | freelance | contract | open-source
+logo: ./tennaxia.svg # optional, placed in same folder
 technologies: [React Native, Expo, TypeScript, GraphQL, Turborepo, GitHub Actions]
 featured: true
 ---
-
 Lead mobile engineering for Tennaxia's EHS (Environmental, Health & Safety) compliance platform,
 targeting field teams in industrial environments.
 
@@ -47,6 +46,7 @@ pnpm add -D astro-pdf
 ```
 
 Configuration in `astro.config.mjs`:
+
 ```js
 import pdf from 'astro-pdf'
 
@@ -55,8 +55,8 @@ export default defineConfig({
     pdf({
       pages: { '/work': 'cv.pdf' },
       // custom styles to print-optimize the /work page
-    })
-  ]
+    }),
+  ],
 })
 ```
 
@@ -64,6 +64,7 @@ This generates `/dist/cv.pdf` at build time from the live `/work` page, printed 
 The site page and the PDF are always in sync.
 
 Alternative if `astro-pdf` is too heavy for CF Pages build:
+
 - Keep Google Drive PDF link until content is finalised
 - Then add a GitHub Actions step to generate and commit `public/cv.pdf`
 

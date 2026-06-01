@@ -2,13 +2,13 @@
 
 ## Quality Tools
 
-| Concern | Tool | Notes |
-|---------|------|-------|
-| Type checking | `astro check` + `tsc --noEmit` | `astro check` covers `.astro` files; `tsc` covers the rest |
-| Linting | ESLint 9 (flat config) | `eslint.config.js` — no `.eslintrc` |
-| Formatting | Prettier | `prettier-plugin-astro` for `.astro` files |
-| Unit tests | Vitest | Pure logic: form validation, i18n helpers, email obfuscation |
-| E2E tests | Playwright | Full page tests against production build |
+| Concern       | Tool                           | Notes                                                        |
+| ------------- | ------------------------------ | ------------------------------------------------------------ |
+| Type checking | `astro check` + `tsc --noEmit` | `astro check` covers `.astro` files; `tsc` covers the rest   |
+| Linting       | ESLint 9 (flat config)         | `eslint.config.js` — no `.eslintrc`                          |
+| Formatting    | Prettier                       | `prettier-plugin-astro` for `.astro` files                   |
+| Unit tests    | Vitest                         | Pure logic: form validation, i18n helpers, email obfuscation |
+| E2E tests     | Playwright                     | Full page tests against production build                     |
 
 ### ESLint plugins
 
@@ -65,14 +65,14 @@ By the time you review, the tests already passed — you're reviewing correctnes
 
 ### Test scope per PR
 
-| PR | Tests |
-|----|-------|
-| `feat/scaffold` | Loads home page, no console errors, correct `<title>` |
-| `feat/home` | Hero text visible, nav links present, dark mode toggle works |
-| `feat/work` | CV page renders roles, download button present |
-| `feat/portfolio` | Grid renders, filter chips work, detail page loads |
-| `feat/contact` | Form submits (mock Resend), success state shown, email reveal works |
-| `feat/i18n` | `/fr/` loads, lang toggle switches locale, hreflang tags present |
+| PR               | Tests                                                               |
+| ---------------- | ------------------------------------------------------------------- |
+| `feat/scaffold`  | Loads home page, no console errors, correct `<title>`               |
+| `feat/home`      | Hero text visible, nav links present, dark mode toggle works        |
+| `feat/work`      | CV page renders roles, download button present                      |
+| `feat/portfolio` | Grid renders, filter chips work, detail page loads                  |
+| `feat/contact`   | Form submits (mock Resend), success state shown, email reveal works |
+| `feat/i18n`      | `/fr/` loads, lang toggle switches locale, hreflang tags present    |
 
 ### Config
 
@@ -87,7 +87,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   webServer: {
     command: 'pnpm preview',
-    port: 8788,       // wrangler pages dev port
+    port: 8788, // wrangler pages dev port
     reuseExistingServer: !process.env.CI,
   },
   projects: [
@@ -141,7 +141,7 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
-    needs: quality          # only run if build passes
+    needs: quality # only run if build passes
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -165,6 +165,7 @@ On failure, the Playwright HTML report is uploaded as an artifact so you can ins
 ### Branch protection on `main`
 
 Set in GitHub repo Settings → Branches:
+
 - Require status checks: `quality` + `e2e`
 - Require PR before merging
 - No direct pushes to `main`
