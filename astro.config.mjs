@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config'
+import { defineConfig, sessionDrivers } from 'astro/config'
 import tailwindcss from '@tailwindcss/vite'
 import cloudflare from '@astrojs/cloudflare'
 import sitemap from '@astrojs/sitemap'
@@ -12,6 +12,11 @@ export default defineConfig({
   // Astro 6: 'static' is the default; routes opt into server rendering with
   // `export const prerender = false` (used by src/pages/api/contact.ts).
   output: 'static',
+  // The site doesn't use sessions. Without an explicit driver the Cloudflare
+  // adapter auto-enables KV-backed sessions and emits an id-less SESSION
+  // binding, which `wrangler versions upload` tries to re-provision on every
+  // CI run (and fails once the namespace exists).
+  session: { driver: sessionDrivers.null() },
   adapter: cloudflare({
     // Optimise images at build time with sharp instead of the runtime
     // Cloudflare Images binding (which requires workerd during prerender).

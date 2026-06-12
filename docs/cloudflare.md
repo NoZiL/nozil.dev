@@ -23,10 +23,15 @@ pnpm add @astrojs/cloudflare
 
 ```js
 import cloudflare from '@astrojs/cloudflare'
+import { defineConfig, sessionDrivers } from 'astro/config'
 
 export default defineConfig({
   site: 'https://nozil.dev',
   output: 'static', // Astro 6 removed 'hybrid'; static is the default
+  // No sessions on this site. Without an explicit driver the adapter
+  // auto-enables KV sessions and emits an id-less SESSION binding, which
+  // `wrangler versions upload` tries to (re-)provision on every CI run.
+  session: { driver: sessionDrivers.null() },
   adapter: cloudflare({
     imageService: 'compile', // optimise with sharp at build time, no workerd binding
     platformProxy: { enabled: false }, // miniflare-at-dev-startup hangs here; re-enable when bindings are needed locally
@@ -108,8 +113,9 @@ skips gracefully (the job stays green).
 | `CLOUDFLARE_ACCOUNT_ID` | Account ID — CF dashboard → Workers & Pages → right sidebar  |
 
 **Create the token**: CF dashboard → My Profile → API Tokens → Create Token →
-_Edit Cloudflare Workers_ template (grants Workers Scripts:Edit + Workers KV:Edit, which the
-`SESSION` KV binding needs). Scope it to the relevant account.
+_Edit Cloudflare Workers_ template (grants Workers Scripts:Edit; the bundled Workers KV:Edit
+is unused — sessions are disabled in `astro.config.mjs`, so no KV binding exists). Scope it
+to the relevant account.
 
 **Set the secrets** (never commit them) — via the GitHub UI (Settings → Secrets and variables
 → Actions) or the CLI:
