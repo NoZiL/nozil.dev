@@ -74,6 +74,26 @@ first paint to avoid flash. Preference stored in `localStorage`, falls back to `
 - Spacing: 8px base unit, Tailwind defaults
 - No sidebars — single column on all breakpoints, graceful widescreen centering
 
+## Responsive
+
+Mobile-first: unprefixed Tailwind classes target a 360px viewport, then layer
+`sm:`/`md:`/`lg:` (Tailwind defaults: 640 / 768 / 1024) upward. Acceptance criteria for
+every feature PR:
+
+- **Nav**: stays a single row at all widths — 3–4 short links, no hamburger menu.
+  If the i18n + theme toggles crowd 360px, collapse toggles to icons, not a menu.
+- **Home**: hero scales down (`text-3xl md:text-4xl`), skill chips wrap, CTA row stacks
+  (`flex-col sm:flex-row`).
+- **Work**: role header (company · title · dates) wraps gracefully; tech tags wrap;
+  CV download button stays reachable above the timeline on mobile.
+- **Portfolio**: grid `grid-cols-1 md:grid-cols-2`; filter chips wrap — no horizontal scroll.
+- **Contact**: form fields full width on mobile; touch targets ≥ 44px.
+- **Images**: `astro:assets` with explicit dimensions (no layout shift), never wider than
+  the container.
+- **Test gate**: each feature PR's Playwright specs must assert the layout-critical mobile
+  behavior (nav usable, grid collapsed, chips wrapped) in the existing `mobile` project
+  (Pixel 7) — not just desktop.
+
 ## Page-by-page UX
 
 ### Home `/`
