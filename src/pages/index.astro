@@ -1,5 +1,12 @@
 ---
 import PageLayout from '../layouts/PageLayout.astro'
+// GitHub avatar, vendored pre-sized (the compile image service can't transform
+// images in this build: remote ones aren't emitted, and local transforms write
+// to outDir while the adapter relocates assets to dist/client — ENOENT).
+// Plain <img> + the imported original avoids the transform step. Refresh with:
+// curl -sL 'https://avatars.githubusercontent.com/u/3874258?v=4&s=192' -o /tmp/a.png
+// then resize to 192px webp (sharp) → src/assets/avatar.webp
+import avatar from '../assets/avatar.webp'
 
 // Signal skills only (see docs/bio.md for the full taxonomy)
 const skills = ['React Native', 'Expo', 'TypeScript', 'React', 'Tailwind CSS', 'Node.js', 'GraphQL', 'PostgreSQL']
@@ -9,10 +16,23 @@ const button = 'rounded-lg px-4 py-2 text-center text-sm font-medium'
 
 <PageLayout title="Nicolas Zilli — Lead Mobile Engineer">
   <section>
-    <h1 class="text-3xl font-semibold tracking-tight text-zinc-900 md:text-4xl dark:text-violet-100">Nicolas Zilli</h1>
-    <p class="text-accent dark:text-accent-dark mt-2 font-mono text-sm">
-      Lead Mobile Engineer · Freelance Software Developer
-    </p>
+    <div class="flex items-center gap-5">
+      <img
+        src={avatar.src}
+        alt="Portrait of Nicolas Zilli"
+        width={avatar.width}
+        height={avatar.height}
+        class="dark:border-dusk-border size-16 rounded-full border border-zinc-200 md:size-20"
+      />
+      <div>
+        <h1 class="text-3xl font-semibold tracking-tight text-zinc-900 md:text-4xl dark:text-violet-100">
+          Nicolas Zilli
+        </h1>
+        <p class="text-accent dark:text-accent-dark mt-2 font-mono text-sm">
+          Lead Mobile Engineer · Freelance Software Developer
+        </p>
+      </div>
+    </div>
     <p class="mt-5 max-w-prose text-lg">
       I'm a Lyon-based developer specialising in React Native and Expo — leading mobile engineering at Tennaxia. Through
       nozil.dev I help founders and small teams turn ideas into shipped products, with 10 years of React behind every
