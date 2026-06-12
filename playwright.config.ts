@@ -11,7 +11,9 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:8788',
   },
   webServer: {
-    command: 'pnpm preview',
+    // CI builds explicitly before `pnpm e2e`; locally, build first so a fresh
+    // checkout works and tests never run against stale dist/ output.
+    command: process.env.CI ? 'pnpm preview' : 'pnpm build && pnpm preview',
     url: 'http://127.0.0.1:8788',
     timeout: 120_000,
     reuseExistingServer: !process.env.CI,

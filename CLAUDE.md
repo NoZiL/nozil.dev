@@ -25,7 +25,7 @@ pnpm e2e          # playwright test (against production build)
 GitHub Issues #2–#8 — one per feature PR, in implementation order.
 GitHub Project board: https://github.com/users/NoZiL/projects/2
 
-Astro 6.3.7 · Tailwind CSS 4 · TypeScript 6 · pnpm 11 via corepack · Cloudflare Workers
+Astro 6.4.2 · Tailwind CSS 4 · TypeScript 6 · pnpm 11 via corepack · Cloudflare Workers
 
 Full version table and rationale: @docs/tech-stack.md
 

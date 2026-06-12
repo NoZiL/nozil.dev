@@ -7,6 +7,8 @@ interface Props {
 }
 
 const { title, description } = Astro.props
+
+const link = 'hover:text-accent dark:hover:text-accent-dark'
 ---
 
 <BaseLayout title={title} description={description}>
@@ -14,19 +16,17 @@ const { title, description } = Astro.props
     <header class="flex items-center justify-between py-6">
       <a href="/" class="font-mono text-sm font-medium text-zinc-900 dark:text-violet-100">nozil.dev</a>
       <nav class="flex items-center gap-4 text-sm">
-        <a href="/work" class="hover:text-accent dark:hover:text-accent-dark">Work</a>
-        <a href="/portfolio" class="hover:text-accent dark:hover:text-accent-dark">Portfolio</a>
-        <a href="/contact" class="hover:text-accent dark:hover:text-accent-dark">Contact</a>
+        <a href="/work" class={link}>Work</a>
+        <a href="/portfolio" class={link}>Portfolio</a>
+        <a href="/contact" class={link}>Contact</a>
       </nav>
     </header>
     <main class="flex-1 py-8">
       <slot />
     </main>
     <footer class="flex items-center gap-4 py-8 text-sm text-zinc-400 dark:text-violet-500">
-      <a href="https://github.com/nozil" class="hover:text-accent dark:hover:text-accent-dark">GitHub</a>
-      <a href="https://www.linkedin.com/in/nicolaszilli" class="hover:text-accent dark:hover:text-accent-dark"
-        >LinkedIn</a
-      >
+      <a href="https://github.com/nozil" class={link}>GitHub</a>
+      <a href="https://www.linkedin.com/in/nicolaszilli" class={link}>LinkedIn</a>
     </footer>
   </div>
 </BaseLayout>

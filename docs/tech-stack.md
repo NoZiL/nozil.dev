@@ -27,15 +27,15 @@ SvelteKit: excellent alternative if React familiarity is less important. Deferre
 
 ## Stack
 
-Pinned to verified npm latest as of 2026-05-22. Run `pnpm outdated` to check for bumps.
+Pinned to verified npm latest as of 2026-06-12 (sync this table with package.json on every dep bump). Run `pnpm outdated` to check for bumps.
 
 ```
 Node.js 24 LTS
 pnpm 11.2.2          # managed via corepack (packageManager field in package.json)
 
-astro 6.3.7
-├── @astrojs/cloudflare 13.5.4   # CF Workers adapter (output: 'static', server routes opt-in)
-├── @astrojs/sitemap 3.7.2       # auto sitemap + hreflang
+astro 6.4.2
+├── @astrojs/cloudflare 13.6.0   # CF Workers adapter (output: 'static', server routes opt-in)
+├── @astrojs/sitemap 3.7.3       # auto sitemap + hreflang
 ├── astro:content                # typed content collections (built-in)
 └── astro:assets                 # optimised images + <Image> (built-in)
 
@@ -47,7 +47,7 @@ typescript 6.0.3
 zod 4.4.3                       # content schemas + form validation (note: v4 API)
 
 wrangler 4.95.0                 # CLI for CF Workers local dev + deploy (bumped to satisfy @cloudflare/vite-plugin peer)
-resend 6.12.3                   # transactional email — form → inbox, no storage layer
+resend 6.12.4                   # transactional email — form → inbox, no storage layer
 ```
 
 ### pnpm via corepack
