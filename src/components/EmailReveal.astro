@@ -1,0 +1,23 @@
+{
+  /* JS email reveal — the address never appears in static HTML (see
+    docs/contact-plan.md). Assembled from parts on click so plain-text
+    scrapers find nothing, even in the minified bundle. */
+}
+<button
+  type="button"
+  id="reveal-email"
+  class="hover:text-accent dark:hover:text-accent-dark cursor-pointer underline decoration-dotted underline-offset-4"
+>
+  Show email
+</button>
+<span id="email-display" aria-live="polite" class="font-mono"></span>
+
+<script>
+  document.getElementById('reveal-email')?.addEventListener('click', () => {
+    const display = document.getElementById('email-display')
+    const button = document.getElementById('reveal-email')
+    if (!display || !button) return
+    display.textContent = ['contact', 'nozil.dev'].join('@')
+    button.hidden = true
+  })
+</script>

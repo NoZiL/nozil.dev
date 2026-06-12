@@ -21,6 +21,8 @@
   "dependencies": {
     "@astrojs/cloudflare": "13.6.0",
     "@astrojs/sitemap": "3.7.3",
+    "@fontsource-variable/geist": "5.2.9",
+    "@fontsource-variable/geist-mono": "5.2.8",
     "astro": "6.4.2",
     "resend": "6.12.4"
   },

@@ -6,8 +6,12 @@ interface Props {
   description?: string
 }
 
-const { title, description = 'Nicolas Zilli — Lead Mobile Engineer · Freelance Dev · Lyon, France.' } = Astro.props
+const {
+  title,
+  description = 'Lead Mobile Engineer at Tennaxia · Freelance dev at nozil.dev · React Native & TypeScript · Lyon, France',
+} = Astro.props
 const lang = Astro.currentLocale ?? 'en'
+const canonical = new URL(Astro.url.pathname, Astro.site)
 ---
 
 <!doctype html>
@@ -19,6 +23,14 @@ const lang = Astro.currentLocale ?? 'en'
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {/* Identity verification (IndieAuth / Mastodon-style) */}
+    <link rel="me" href="https://github.com/nozil" />
+    <link rel="me" href="https://www.linkedin.com/in/nicolaszilli" />
     {/* No-flash dark mode: runs before first paint */}
     <script is:inline>
       ;(() => {
