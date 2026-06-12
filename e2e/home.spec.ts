@@ -18,7 +18,7 @@ test('hero, skill chips and featured empty state are visible', async ({ page }) 
 
   const avatar = page.getByRole('img', { name: 'Portrait of Nicolas Zilli' })
   await expect(avatar).toBeVisible()
-  // Optimised at build time and self-hosted — never hotlinked from GitHub
+  // Self-hosted fingerprinted asset — never hotlinked from GitHub
   await expect(avatar).toHaveAttribute('src', /^\/_astro\//)
 
   await expect(page.getByText('Lead Mobile Engineer · Freelance Software Developer')).toBeVisible()

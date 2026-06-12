@@ -1,17 +1,16 @@
 ---
 import PageLayout from '../layouts/PageLayout.astro'
-// GitHub avatar, vendored pre-sized (the compile image service can't transform
-// images in this build: remote ones aren't emitted, and local transforms write
-// to outDir while the adapter relocates assets to dist/client — ENOENT).
-// Plain <img> + the imported original avoids the transform step. Refresh with:
-// curl -sL 'https://avatars.githubusercontent.com/u/3874258?v=4&s=192' -o /tmp/a.png
-// then resize to 192px webp (sharp) → src/assets/avatar.webp
+// Vendored GitHub avatar (u/3874258 at s=192, converted to webp via sharp),
+// served as a plain <img>: the compile image service can't transform images in
+// this build — it writes to outDir while the CF adapter emits to dist/client.
 import avatar from '../assets/avatar.webp'
 
 // Signal skills only (see docs/bio.md for the full taxonomy)
 const skills = ['React Native', 'Expo', 'TypeScript', 'React', 'Tailwind CSS', 'Node.js', 'GraphQL', 'PostgreSQL']
 
 const button = 'rounded-lg px-4 py-2 text-center text-sm font-medium'
+const buttonOutline =
+  'hover:border-accent hover:text-accent dark:border-dusk-border dark:hover:border-accent-dark dark:hover:text-accent-dark border border-zinc-200 text-zinc-900 dark:text-violet-100'
 ---
 
 <PageLayout title="Nicolas Zilli — Lead Mobile Engineer">
@@ -56,7 +55,7 @@ const button = 'rounded-lg px-4 py-2 text-center text-sm font-medium'
     <h2 id="featured-heading" class="text-sm font-medium tracking-wide text-zinc-400 uppercase dark:text-violet-500">
       Featured work
     </h2>
-    {/* Empty state — replaced by project cards in the portfolio PR (#5) */}
+    {/* Placeholder until portfolio cards land (#5) */}
     <p class="dark:border-dusk-border mt-4 rounded-lg border border-dashed border-zinc-200 p-6 text-sm">
       Selected projects are being written up — the portfolio lands here soon.
     </p>
@@ -72,23 +71,7 @@ const button = 'rounded-lg px-4 py-2 text-center text-sm font-medium'
     >
       View CV
     </a>
-    <a
-      href="/portfolio"
-      class:list={[
-        button,
-        'hover:border-accent hover:text-accent dark:border-dusk-border dark:hover:border-accent-dark dark:hover:text-accent-dark border border-zinc-200 text-zinc-900 dark:text-violet-100',
-      ]}
-    >
-      See portfolio
-    </a>
-    <a
-      href="/contact"
-      class:list={[
-        button,
-        'hover:border-accent hover:text-accent dark:border-dusk-border dark:hover:border-accent-dark dark:hover:text-accent-dark border border-zinc-200 text-zinc-900 dark:text-violet-100',
-      ]}
-    >
-      Contact me
-    </a>
+    <a href="/portfolio" class:list={[button, buttonOutline]}> See portfolio </a>
+    <a href="/contact" class:list={[button, buttonOutline]}> Contact me </a>
   </section>
 </PageLayout>
