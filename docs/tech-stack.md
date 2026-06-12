@@ -4,15 +4,15 @@
 
 ### Why Astro
 
-| Concern                   | Astro                                                       | Next.js (current)                     |
-| ------------------------- | ----------------------------------------------------------- | ------------------------------------- |
-| JS shipped to browser     | Zero by default (opt-in islands)                            | React runtime always present          |
-| Static content (CV, bio)  | First-class — just `.astro` or `.md`                        | Needs SSG config                      |
-| Content collections       | Built-in typed collections                                  | Manual MDX setup                      |
-| Cloudflare Workers build  | `@astrojs/cloudflare` adapter                               | `@cloudflare/next-on-pages` (heavier) |
-| Server routes (Worker)    | Native via `src/pages/api/*.ts`                             | Via pages-plugin wrapper              |
-| Bundle size               | ~0kb for static pages                                       | React + Next runtime overhead         |
-| Tailwind integration      | `@tailwindcss/vite` — native Vite plugin, no wrapper needed | Same                                  |
+| Concern                  | Astro                                                       | Next.js (current)                     |
+| ------------------------ | ----------------------------------------------------------- | ------------------------------------- |
+| JS shipped to browser    | Zero by default (opt-in islands)                            | React runtime always present          |
+| Static content (CV, bio) | First-class — just `.astro` or `.md`                        | Needs SSG config                      |
+| Content collections      | Built-in typed collections                                  | Manual MDX setup                      |
+| Cloudflare Workers build | `@astrojs/cloudflare` adapter                               | `@cloudflare/next-on-pages` (heavier) |
+| Server routes (Worker)   | Native via `src/pages/api/*.ts`                             | Via pages-plugin wrapper              |
+| Bundle size              | ~0kb for static pages                                       | React + Next runtime overhead         |
+| Tailwind integration     | `@tailwindcss/vite` — native Vite plugin, no wrapper needed | Same                                  |
 
 ### Why not Next.js
 
