@@ -4,15 +4,15 @@
 
 ### Why Astro
 
-| Concern | Astro | Next.js (current) |
-|---------|-------|-------------------|
-| JS shipped to browser | Zero by default (opt-in islands) | React runtime always present |
-| Static content (CV, bio) | First-class — just `.astro` or `.md` | Needs SSG config |
-| Content collections | Built-in typed collections | Manual MDX setup |
-| Build output for CF Pages | `@astrojs/cloudflare` adapter | `@cloudflare/next-on-pages` (heavier) |
-| CF Pages Functions | Native via `src/pages/api/*.ts` | Via pages-plugin wrapper |
-| Bundle size | ~0kb for static pages | React + Next runtime overhead |
-| Tailwind integration | `@tailwindcss/vite` — native Vite plugin, no wrapper needed | Same |
+| Concern                  | Astro                                                       | Next.js (current)                     |
+| ------------------------ | ----------------------------------------------------------- | ------------------------------------- |
+| JS shipped to browser    | Zero by default (opt-in islands)                            | React runtime always present          |
+| Static content (CV, bio) | First-class — just `.astro` or `.md`                        | Needs SSG config                      |
+| Content collections      | Built-in typed collections                                  | Manual MDX setup                      |
+| Cloudflare Workers build | `@astrojs/cloudflare` adapter                               | `@cloudflare/next-on-pages` (heavier) |
+| Server routes (Worker)   | Native via `src/pages/api/*.ts`                             | Via pages-plugin wrapper              |
+| Bundle size              | ~0kb for static pages                                       | React + Next runtime overhead         |
+| Tailwind integration     | `@tailwindcss/vite` — native Vite plugin, no wrapper needed | Same                                  |
 
 ### Why not Next.js
 
@@ -27,15 +27,15 @@ SvelteKit: excellent alternative if React familiarity is less important. Deferre
 
 ## Stack
 
-Pinned to verified npm latest as of 2026-05-22. Run `pnpm outdated` to check for bumps.
+Pinned to verified npm latest as of 2026-06-12 (sync this table with package.json on every dep bump). Run `pnpm outdated` to check for bumps.
 
 ```
 Node.js 24 LTS
 pnpm 11.2.2          # managed via corepack (packageManager field in package.json)
 
-astro 6.3.7
-├── @astrojs/cloudflare 13.5.4   # CF Pages adapter (output: 'static'+'server')
-├── @astrojs/sitemap 3.7.2       # auto sitemap + hreflang
+astro 6.4.2
+├── @astrojs/cloudflare 13.6.0   # CF Workers adapter (output: 'static', server routes opt-in)
+├── @astrojs/sitemap 3.7.3       # auto sitemap + hreflang
 ├── astro:content                # typed content collections (built-in)
 └── astro:assets                 # optimised images + <Image> (built-in)
 
@@ -46,8 +46,8 @@ astro 6.3.7
 typescript 6.0.3
 zod 4.4.3                       # content schemas + form validation (note: v4 API)
 
-wrangler 4.93.1                 # CLI for CF Pages Functions local dev
-resend 6.12.3                   # transactional email — form → inbox, no storage layer
+wrangler 4.95.0                 # CLI for CF Workers local dev + deploy (bumped to satisfy @cloudflare/vite-plugin peer)
+resend 6.12.4                   # transactional email — form → inbox, no storage layer
 ```
 
 ### pnpm via corepack
@@ -77,7 +77,7 @@ import tailwindcss from '@tailwindcss/vite'
 import cloudflare from '@astrojs/cloudflare'
 
 export default defineConfig({
-  output: 'hybrid',
+  output: 'static',
   adapter: cloudflare(),
   vite: { plugins: [tailwindcss()] },
 })
@@ -85,14 +85,14 @@ export default defineConfig({
 
 ```css
 /* src/styles/global.css */
-@import "tailwindcss";
+@import 'tailwindcss';
 @plugin "@tailwindcss/typography";
 
 /* Design tokens — replaces tailwind.config.js theme.extend */
 @theme {
   --color-accent: var(--color-violet-600);
-  --font-sans: "Geist", sans-serif;
-  --font-mono: "Geist Mono", monospace;
+  --font-sans: 'Geist', sans-serif;
+  --font-mono: 'Geist Mono', monospace;
 }
 ```
 
@@ -123,9 +123,9 @@ Recommendation: option 1. Implement once the `/work` page content is finalised.
 
 ## Deployment
 
-Cloudflare Pages, same as previous site.
+Cloudflare Workers (static assets + server routes). See `docs/cloudflare.md`.
+
 - Branch `main` → production (nozil.dev)
-- Preview branches → `*.nozil-dev.pages.dev`
-- New CF Pages project `nozil-dev` (fresh — not inherited from old site)
+- Workers service `nozil-dev` (fresh — not inherited from old site)
 - `compatibility_flags = ["nodejs_compat"]`
-- `compatibility_date = "2026-05-22"` (update to current date at scaffold time)
+- `compatibility_date = "2026-06-01"`

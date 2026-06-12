@@ -2,13 +2,13 @@
 
 ## Quality Tools
 
-| Concern | Tool | Notes |
-|---------|------|-------|
-| Type checking | `astro check` + `tsc --noEmit` | `astro check` covers `.astro` files; `tsc` covers the rest |
-| Linting | ESLint 9 (flat config) | `eslint.config.js` — no `.eslintrc` |
-| Formatting | Prettier | `prettier-plugin-astro` for `.astro` files |
-| Unit tests | Vitest | Pure logic: form validation, i18n helpers, email obfuscation |
-| E2E tests | Playwright | Full page tests against production build |
+| Concern       | Tool                           | Notes                                                        |
+| ------------- | ------------------------------ | ------------------------------------------------------------ |
+| Type checking | `astro check` + `tsc --noEmit` | `astro check` covers `.astro` files; `tsc` covers the rest   |
+| Linting       | ESLint 10 (flat config)        | `eslint.config.js` — no `.eslintrc`                          |
+| Formatting    | Prettier                       | `prettier-plugin-astro` for `.astro` files                   |
+| Unit tests    | Vitest                         | Pure logic: form validation, i18n helpers, email obfuscation |
+| E2E tests     | Playwright                     | Full page tests against production build                     |
 
 ### ESLint plugins
 
@@ -22,36 +22,14 @@ eslint-plugin-jsx-a11y       # accessibility rules
 
 ### Prettier config
 
-```json
-{
-  "semi": false,
-  "singleQuote": true,
-  "tabWidth": 2,
-  "trailingComma": "es5",
-  "plugins": ["prettier-plugin-astro"]
-}
-```
+See [`.prettierrc`](../.prettierrc) — no semicolons, single quotes, 2-space tabs,
+print width 120, `prettier-plugin-astro` for `.astro` files.
 
 ### package.json scripts
 
-```json
-{
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro check && astro build",
-    "preview": "wrangler pages dev ./dist",
-    "deploy": "wrangler pages deploy ./dist",
-    "typecheck": "astro check && tsc --noEmit",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "e2e": "playwright test",
-    "e2e:ui": "playwright test --ui"
-  }
-}
-```
+See [`package.json`](../package.json) (summarised in [CLAUDE.md](../CLAUDE.md) → Commands).
+Notable: `preview`/`deploy` run `wrangler` against the build-time-generated config resolved
+by `scripts/cf-config.mjs` — see [docs/cloudflare.md](./cloudflare.md).
 
 ---
 
@@ -65,106 +43,55 @@ By the time you review, the tests already passed — you're reviewing correctnes
 
 ### Test scope per PR
 
-| PR | Tests |
-|----|-------|
-| `feat/scaffold` | Loads home page, no console errors, correct `<title>` |
-| `feat/home` | Hero text visible, nav links present, dark mode toggle works |
-| `feat/work` | CV page renders roles, download button present |
-| `feat/portfolio` | Grid renders, filter chips work, detail page loads |
-| `feat/contact` | Form submits (mock Resend), success state shown, email reveal works |
-| `feat/i18n` | `/fr/` loads, lang toggle switches locale, hreflang tags present |
+| PR               | Tests                                                               |
+| ---------------- | ------------------------------------------------------------------- |
+| `feat/scaffold`  | Loads home page, no console errors, correct `<title>`               |
+| `feat/home`      | Hero text visible, nav links present, dark mode toggle works        |
+| `feat/work`      | CV page renders roles, download button present                      |
+| `feat/portfolio` | Grid renders, filter chips work, detail page loads                  |
+| `feat/contact`   | Form submits (mock Resend), success state shown, email reveal works |
+| `feat/i18n`      | `/fr/` loads, lang toggle switches locale, hreflang tags present    |
 
 ### Config
 
-```ts
-// playwright.config.ts
-import { defineConfig, devices } from '@playwright/test'
+See [`playwright.config.ts`](../playwright.config.ts). Key points:
 
-export default defineConfig({
-  testDir: './e2e',
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  webServer: {
-    command: 'pnpm preview',
-    port: 8788,       // wrangler pages dev port
-    reuseExistingServer: !process.env.CI,
-  },
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile', use: { ...devices['iPhone 15'] } },
-  ],
-})
-```
+- `webServer` starts `pnpm preview` (`wrangler dev` on `127.0.0.1:8788`) — tests run against
+  the actual built Worker, not `astro dev`. Locally it builds first; CI builds explicitly.
+- Two projects: desktop Chrome + a Chromium-based mobile device, so CI only needs the
+  chromium browser binary.
 
-Tests run against `pnpm build` + `pnpm preview` in CI — the actual CF Pages output.
+Tests run against `pnpm build` + `pnpm preview` — the actual Cloudflare Workers output.
 
 ---
 
 ## CI/CD
 
-### Deployment — Cloudflare Pages native
+### Deployment — Cloudflare Workers via GitHub Actions
 
-Connect the GitHub repo to CF Pages in the dashboard. CF Pages handles deployments automatically:
+Deploys run from [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) using
+`wrangler` directly (the original CF Pages-native plan was dropped when the site moved to
+Workers — full details in [docs/cloudflare.md](./cloudflare.md)):
 
-- Push to `main` → production deploy (nozil.dev)
-- Push to any other branch / open PR → preview deploy (`<branch>.nozil-dev.pages.dev`)
-
-**No deploy step needed in GitHub Actions.** GH Actions is a quality gate only.
+- Pull request / push to `main` → `wrangler versions upload` — staged preview version with a
+  `*.workers.dev` URL, commented on the PR. Production traffic never shifts automatically.
+- Manual workflow_dispatch → `wrangler deploy` — promotes a fresh build to production
+  (gated by the `production` GitHub Environment).
 
 ### GitHub Actions — quality gate
 
-File: `.github/workflows/ci.yml`
+See [`.github/workflows/ci.yml`](../.github/workflows/ci.yml):
 
-```yaml
-name: CI
-
-on:
-  pull_request:
-  push:
-    branches: [main]
-
-jobs:
-  quality:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - run: corepack enable
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-      - run: pnpm format:check
-      - run: pnpm typecheck
-      - run: pnpm build
-
-  e2e:
-    runs-on: ubuntu-latest
-    needs: quality          # only run if build passes
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - run: corepack enable
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm build
-      - run: pnpm e2e
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-report
-          path: playwright-report/
-```
-
-The `e2e` job only runs after `quality` passes — no point running Playwright if the build is broken.
-On failure, the Playwright HTML report is uploaded as an artifact so you can inspect what failed.
+- **quality** job: `pnpm lint` → `format:check` → `typecheck` → `build`
+- **e2e** job (needs quality — no point running Playwright if the build is broken):
+  installs the chromium binary (cached, keyed on the Playwright version; ubuntu-latest
+  already ships the system libs, so no slow `--with-deps` apt step), then `pnpm build` +
+  `pnpm e2e`. On failure, the Playwright HTML report is uploaded as an artifact.
 
 ### Branch protection on `main`
 
 Set in GitHub repo Settings → Branches:
+
 - Require status checks: `quality` + `e2e`
 - Require PR before merging
 - No direct pushes to `main`

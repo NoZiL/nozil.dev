@@ -3,6 +3,7 @@
 ## Goal
 
 Showcase 4–8 curated projects that demonstrate craft and/or leadership — especially:
+
 - Still-live web/app/mobile products
 - Projects where Nicolas was sole dev or technical lead
 - Open source work that shows code quality
@@ -50,21 +51,23 @@ Usage numbers, client feedback, or technical achievement worth mentioning.
 
 Gather the following info from LinkedIn, GH repos, and memory:
 
-| Project | Status | Category | Notes |
-|---------|--------|----------|-------|
-| Tennaxia mobile app | Live | Mobile | Lead engineer, field EHS |
-| nozil.dev (this site) | Live | Web | Self-referential — shows craft and tooling choices |
-| Freelance client projects | Live/Private | Mobile/Web | anonymise client if needed |
-| Open source contributions | Various | OSS | From GH profile |
+| Project                   | Status       | Category   | Notes                                              |
+| ------------------------- | ------------ | ---------- | -------------------------------------------------- |
+| Tennaxia mobile app       | Live         | Mobile     | Lead engineer, field EHS                           |
+| nozil.dev (this site)     | Live         | Web        | Self-referential — shows craft and tooling choices |
+| Freelance client projects | Live/Private | Mobile/Web | anonymise client if needed                         |
+| Open source contributions | Various      | OSS        | From GH profile                                    |
 
 ### nozil.dev — self-referential portfolio entry
 
 The site itself is a first-class portfolio project. It demonstrates:
+
 - Technical choices made from scratch (Astro 6, Tailwind 4, Cloudflare Pages)
 - AI-assisted development workflow with Claude Code
 - Public source at `github.com/nozil/nozil.dev` — reviewable craft
 
 Content collection entry (`src/content/projects/nozil-dev.md`):
+
 ```yaml
 ---
 title: nozil.dev

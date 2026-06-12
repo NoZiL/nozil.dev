@@ -1,6 +1,6 @@
 {
   "name": "nozil.dev",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-24-bookworm",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,
@@ -8,9 +8,23 @@
       "installOhMyZshConfig": true,
       "upgradePackages": true,
       "username": "node"
-    }
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/claude-code:2": {
+      "version": "2.1.173"
+    },
+    "ghcr.io/jsburckhardt/devcontainer-features/rtk:1": {}
   },
-  "onCreateCommand": "corepack enable",
+  // Personal-setup mounts: gh + Claude Code credentials from the host. Docker
+  // creates missing host paths as empty dirs, so the container still starts
+  // without them — delete these lines if you don't use these tools, or log in
+  // inside the container (`gh auth login`) instead.
+  "mounts": [
+    "source=${localEnv:HOME}/.config/gh,target=/home/node/.config/gh,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.claude.json,target=/home/node/.claude.json,type=bind,consistency=cached"
+  ],
+  "onCreateCommand": "if [ -w /usr/local/bin ]; then corepack enable; else sudo corepack enable; fi",
   "postStartCommand": "pnpm install",
   "postCreateCommand": "echo 'Dev container ready — run: pnpm dev'",
   "forwardPorts": [4321, 8788],
@@ -34,7 +48,8 @@
         "cloudflare.cloudflare-workers-bindings",
         "GitHub.vscode-pull-request-github",
         "GitHub.vscode-github-actions",
-        "anthropic.claude-code"
+        "anthropic.claude-code",
+        "tamasfe.even-better-toml"
       ],
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",

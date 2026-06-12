@@ -1,7 +1,7 @@
 # nozil.dev
 
 Personal CV and portfolio for Nicolas Zilli — Lead Mobile Engineer · Freelance Dev · Lyon, France.
-Deployed on Cloudflare Pages at https://nozil.dev.
+Deployed on Cloudflare Workers (static assets + server routes) at https://nozil.dev.
 
 > Human-readable setup guide, prerequisites, and deployment notes: see [README.md](./README.md).
 
@@ -10,8 +10,8 @@ Deployed on Cloudflare Pages at https://nozil.dev.
 ```bash
 pnpm dev          # dev server → http://localhost:4321
 pnpm build        # astro check + type-check + production build
-pnpm preview      # preview CF Pages output locally (wrangler, port 8788)
-pnpm deploy       # deploy to Cloudflare Pages
+pnpm preview      # preview built Worker locally (wrangler dev, port 8788)
+pnpm deploy       # deploy to Cloudflare Workers (wrangler deploy)
 pnpm typecheck    # astro check + tsc --noEmit
 pnpm lint         # eslint .
 pnpm format       # prettier --write .
@@ -25,7 +25,7 @@ pnpm e2e          # playwright test (against production build)
 GitHub Issues #2–#8 — one per feature PR, in implementation order.
 GitHub Project board: https://github.com/users/NoZiL/projects/2
 
-Astro 6.3.7 · Tailwind CSS 4 · TypeScript 6 · pnpm 11 via corepack · Cloudflare Pages
+Astro 6.4.2 · Tailwind CSS 4 · TypeScript 6 · pnpm 11 via corepack · Cloudflare Workers
 
 Full version table and rationale: @docs/tech-stack.md
 
@@ -36,7 +36,7 @@ src/
 ├── components/     # PascalCase .astro files
 ├── layouts/        # BaseLayout.astro, PageLayout.astro
 ├── pages/          # file-based routes
-│   ├── api/        # contact.ts → CF Pages Function (POST only)
+│   ├── api/        # contact.ts → server route, prerender=false (POST only)
 │   └── fr/         # French locale pages
 ├── content/        # typed MDX collections: work/, projects/
 │   └── config.ts   # Zod 4 schemas for every collection
@@ -47,8 +47,8 @@ src/
 
 ## Hard Constraints
 
-- **Cloudflare Pages** — no Node.js server runtime; server logic only in CF Pages Functions
-- **Output mode**: `hybrid` — all pages static except `src/pages/api/contact.ts`
+- **Cloudflare Workers** — `@astrojs/cloudflare` adapter; server logic runs in the Worker (needs `nodejs_compat`)
+- **Output mode**: `static` (Astro 6 removed `hybrid`) — pages prerender by default; opt a route into server rendering with `export const prerender = false` (only `src/pages/api/contact.ts`)
 - **No CMS** — all copy in `src/content/` as typed Markdown collections (`.md` files, not `.mdx` unless JSX is needed)
 - **Tailwind v4** — CSS-first; never create `tailwind.config.js` or `tailwind.config.ts`
 - **i18n** — English default (`/`), French at `/fr/`; use Astro built-in i18n routing
@@ -66,7 +66,7 @@ src/
 This repository is **public**. Never introduce any of the following into source files or docs:
 
 - Real email addresses (personal inboxes, internal addresses) — use env var names as placeholders
-- API keys, tokens, secrets of any kind — all go in CF Pages dashboard or `.dev.vars` (gitignored)
+- API keys, tokens, secrets of any kind — all go in the CF Workers dashboard / `wrangler secret put` or `.dev.vars` (gitignored)
 - Client names, private project details, or any information shared under NDA
 
 If writing code that needs a secret value, reference the env var (`context.env.EMAIL_TO`).
@@ -75,6 +75,7 @@ If writing docs that explain configuration, name the variable — never its valu
 ## Required Backlinks
 
 Every page's nav and footer must link to:
+
 - `https://github.com/nozil`
 - `https://www.linkedin.com/in/nicolaszilli`
 - Email address via JS reveal button (no `mailto:` in HTML — see contact-plan.md)
@@ -82,7 +83,7 @@ Every page's nav and footer must link to:
 ## Contacts
 
 - `EMAIL_FROM` env var — sending address: `contact@nozil.dev`
-- `EMAIL_TO` env var — destination inbox (set in CF Pages dashboard, never in repo)
+- `EMAIL_TO` env var — destination inbox (set in CF Workers dashboard, never in repo)
 
 ## Docs loaded into context
 
