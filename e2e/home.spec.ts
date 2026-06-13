@@ -46,12 +46,15 @@ test('dark mode toggle switches the class and persists across reloads', async ({
   const toggle = page.getByRole('button', { name: 'Toggle dark mode' })
 
   await expect(html).not.toHaveClass(/dark/)
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
 
   await toggle.click()
   await expect(html).toHaveClass(/dark/)
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true')
 
   await page.reload()
   await expect(html).toHaveClass(/dark/)
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true')
 
   await toggle.click()
   await expect(html).not.toHaveClass(/dark/)
@@ -80,6 +83,8 @@ test('email never appears in static HTML and is revealed on click', async ({ pag
 
   await page.getByRole('button', { name: 'Show email' }).click()
   await expect(page.locator('#email-display')).toHaveText('contact@nozil.dev')
+  // Focus moves to the revealed address so it isn't dropped with the button
+  await expect(page.locator('#email-display')).toBeFocused()
   await expect(page.getByRole('button', { name: 'Show email' })).toBeHidden()
 })
 

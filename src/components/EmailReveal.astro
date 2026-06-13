@@ -10,7 +10,7 @@
 >
   Show email
 </button>
-<span id="email-display" aria-live="polite" class="font-mono"></span>
+<span id="email-display" aria-live="polite" tabindex="-1" class="font-mono"></span>
 
 <script>
   document.getElementById('reveal-email')?.addEventListener('click', () => {
@@ -18,6 +18,8 @@
     const button = document.getElementById('reveal-email')
     if (!display || !button) return
     display.textContent = ['contact', 'nozil.dev'].join('@')
+    // Move focus before hiding the button, or keyboard focus drops to <body>
+    display.focus()
     button.hidden = true
   })
 </script>

@@ -1,9 +1,10 @@
+/* All @import rules must precede other at-rules (CSS spec) */
 @import 'tailwindcss';
-@plugin "@tailwindcss/typography";
-
 /* Geist variable fonts, self-hosted via fontsource */
 @import '@fontsource-variable/geist';
 @import '@fontsource-variable/geist-mono';
+
+@plugin "@tailwindcss/typography";
 
 /* Dark mode is class-based: <html class="dark"> */
 @variant dark (&:where(.dark, .dark *));
