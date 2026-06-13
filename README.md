@@ -56,6 +56,10 @@ pnpm test         # vitest run (unit tests)
 pnpm e2e          # playwright test (against production build)
 ```
 
+The dev container installs the Playwright chromium browser (+ system libs) on creation.
+Outside it, run `pnpm exec playwright install chromium` once before `pnpm e2e`
+(on Linux, add `--with-deps` to also install the browser's system libraries).
+
 ---
 
 ## Project structure

@@ -26,7 +26,10 @@
   ],
   "onCreateCommand": "if [ -w /usr/local/bin ]; then corepack enable; else sudo corepack enable; fi",
   "postStartCommand": "pnpm install",
-  "postCreateCommand": "echo 'Dev container ready — run: pnpm dev'",
+  // postCreate runs before postStart, so install deps here first; the
+  // postStart pnpm install is then a no-op on later starts. --with-deps
+  // pulls the chromium system libraries (libnspr4 & co) via sudo apt.
+  "postCreateCommand": "pnpm install && pnpm exec playwright install --with-deps chromium && echo 'Dev container ready — run: pnpm dev'",
   "forwardPorts": [4321, 8788],
   "portsAttributes": {
     "4321": {
@@ -62,7 +65,8 @@
           "astro": "html"
         },
         "files.associations": {
-          "*.astro": "astro"
+          "*.astro": "astro",
+          "*.css": "tailwindcss"
         },
         "terminal.integrated.defaultProfile.linux": "zsh"
       }

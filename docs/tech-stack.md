@@ -41,6 +41,8 @@ astro 6.4.2
 
 @tailwindcss/vite 4.3.0         # CSS-first, replaces @astrojs/tailwind
 @tailwindcss/typography 0.5.19  # prose plugin
+@fontsource-variable/geist 5.2.9       # self-hosted Geist Sans (variable)
+@fontsource-variable/geist-mono 5.2.8  # self-hosted Geist Mono (variable)
 (no @tailwindcss/forms — use native CSS + minimal custom styles instead)
 
 typescript 6.0.3

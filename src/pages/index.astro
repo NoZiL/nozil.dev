@@ -1,8 +1,77 @@
 ---
 import PageLayout from '../layouts/PageLayout.astro'
+// Vendored GitHub avatar (u/3874258 at s=192, converted to webp via sharp),
+// served as a plain <img>: the compile image service can't transform images in
+// this build — it writes to outDir while the CF adapter emits to dist/client.
+import avatar from '../assets/avatar.webp'
+
+// Signal skills only (see docs/bio.md for the full taxonomy)
+const skills = ['React Native', 'Expo', 'TypeScript', 'React', 'Tailwind CSS', 'Node.js', 'GraphQL', 'PostgreSQL']
+
+const button = 'rounded-lg px-4 py-2 text-center text-sm font-medium'
+const buttonOutline =
+  'hover:border-accent hover:text-accent dark:border-dusk-border dark:hover:border-accent-dark dark:hover:text-accent-dark border border-zinc-200 text-zinc-900 dark:text-violet-100'
 ---
 
 <PageLayout title="Nicolas Zilli — Lead Mobile Engineer">
-  <h1 class="text-4xl font-semibold tracking-tight text-zinc-900 dark:text-violet-100">Nicolas Zilli</h1>
-  <p class="mt-4 text-lg">Lead Mobile Engineer · Freelance Dev · Lyon, France.</p>
+  <section>
+    <div class="flex items-center gap-5">
+      <img
+        src={avatar.src}
+        alt="Portrait of Nicolas Zilli"
+        width={avatar.width}
+        height={avatar.height}
+        class="dark:border-dusk-border size-16 rounded-full border border-zinc-200 md:size-20"
+      />
+      <div>
+        <h1 class="text-3xl font-semibold tracking-tight text-zinc-900 md:text-4xl dark:text-violet-100">
+          Nicolas Zilli
+        </h1>
+        <p class="text-accent dark:text-accent-dark mt-2 font-mono text-sm">
+          Lead Mobile Engineer · Freelance Software Developer
+        </p>
+      </div>
+    </div>
+    <p class="mt-5 max-w-prose text-lg">
+      I'm a Lyon-based developer specialising in React Native and Expo — leading mobile engineering at Tennaxia. Through
+      nozil.dev I help founders and small teams turn ideas into shipped products, with 10 years of React behind every
+      engagement.
+    </p>
+  </section>
+
+  <section class="mt-8" aria-label="Key skills">
+    <ul class="flex flex-wrap gap-2">
+      {
+        skills.map((skill) => (
+          <li class="dark:border-dusk-border dark:bg-dusk-surface rounded-full border border-zinc-200 bg-white px-3 py-1 font-mono text-xs">
+            {skill}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="mt-12" aria-labelledby="featured-heading">
+    <h2 id="featured-heading" class="text-sm font-medium tracking-wide text-zinc-400 uppercase dark:text-violet-500">
+      Featured work
+    </h2>
+    {/* Placeholder until portfolio cards land (#5) */}
+    <p class="dark:border-dusk-border mt-4 rounded-lg border border-dashed border-zinc-200 p-6 text-sm">
+      Selected projects are being written up — the portfolio lands here soon.
+    </p>
+  </section>
+
+  <section class="mt-12 flex flex-col gap-3 sm:flex-row" aria-label="Call to action">
+    <a
+      href="/work"
+      class:list={[
+        button,
+        'bg-accent dark:bg-accent-dark text-white hover:bg-violet-700 dark:text-violet-950 dark:hover:bg-violet-300',
+      ]}
+    >
+      View CV
+    </a>
+    <a href="/portfolio" class:list={[button, buttonOutline]}> See portfolio </a>
+    <a href="/contact" class:list={[button, buttonOutline]}> Contact me </a>
+  </section>
 </PageLayout>
