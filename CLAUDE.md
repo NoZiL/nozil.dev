@@ -38,8 +38,8 @@ src/
 ├── pages/          # file-based routes
 │   ├── api/        # contact.ts → server route, prerender=false (POST only)
 │   └── fr/         # French locale pages
-├── content/        # typed MDX collections: work/, projects/
-│   └── config.ts   # Zod 4 schemas for every collection
+├── content.config.ts  # Zod 4 schemas for every collection
+├── content/        # typed Markdown collections: work/, projects/
 ├── i18n/           # en.ts + fr.ts string maps
 └── styles/
     └── global.css  # @import "tailwindcss" + @theme {} — no tailwind.config.js
@@ -97,5 +97,5 @@ Every page's nav and footer must link to:
 
 - `docs/concept.md` — site vision, i18n plan, SEO/LLM discoverability
 - `docs/bio.md` — bio copy, skills taxonomy, GitHub README sync strategy
-- `docs/cv-plan.md` — work page data model, CV PDF export plan
+- `docs/cv-plan.md` — /work reference: CV source-of-truth files + how the page is built
 - `docs/portfolio-plan.md` — project collection schema, showcase UX

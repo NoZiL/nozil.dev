@@ -1,91 +1,32 @@
-# CV / Work Page Plan
+# Work / CV Page — Reference
 
-## Goal
+The `/work` page (`src/pages/work.astro`) is **implemented**. This doc is the lean reference for
+maintaining it; the original build plan lived here and is now the code itself.
 
-A human-readable, linkable work history that doubles as the data source for a generated PDF CV.
-No sync issues between the site and a downloadable file.
+## Source of truth (check before editing work content)
 
-## Content Structure
+The canonical CV data lives in personal export files committed in `public/` (intentionally
+public — they are served alongside the site and double as downloadable CVs):
 
-Each role is a Markdown file in `src/content/work/`:
+- **`linkedin_profile_*.pdf`** — the primary, most detailed source. Always check the
+  latest-dated one first when adding or correcting roles, dates, or stacks.
+- **`nicolas_zilli_resume_intl.docx`** and **`nicolas_zilli_cv_fr.docx`** — complementary
+  sources (the curated EN/FR résumés). Use them to cross-check phrasing and the skills
+  taxonomy; they intentionally omit minor roles the LinkedIn export keeps.
 
-```yaml
----
-title: Lead Mobile Engineer
-company: Tennaxia
-companyUrl: https://www.tennaxia.com
-startDate: 2021-01-01
-endDate: null # null = present
-location: Paris, France (remote)
-type: full-time # full-time | freelance | contract | open-source
-logo: ./tennaxia.svg # optional, placed in same folder
-technologies: [React Native, Expo, TypeScript, GraphQL, Turborepo, GitHub Actions]
-featured: true
----
-Lead mobile engineering for Tennaxia's EHS (Environmental, Health & Safety) compliance platform,
-targeting field teams in industrial environments.
+When these disagree, the LinkedIn export wins on facts (dates, titles); the résumés win on
+curated wording.
 
-- Built and maintain the React Native / Expo app from ground up (managed → bare workflow migration)
-- Introduced Turborepo monorepo structure across mobile + API + shared packages
-- Set up CI/CD with EAS Build and GitHub Actions for automated OTA and store releases
-- Work directly with product and design to ship features on a 2-week cycle
-```
+## How it's built
 
-## Roles to Document (initial pass — expand with LinkedIn/resume data)
-
-1. Lead Mobile Engineer — Tennaxia (current)
-2. Freelance Software Developer — nozil.dev (ongoing parallel)
-3. Prior roles (to be filled from LinkedIn / resume)
-
-## CV PDF Generation
-
-Strategy: **build-time PDF snapshot via `astro-pdf`**
-
-```bash
-pnpm add -D astro-pdf
-```
-
-Configuration in `astro.config.mjs`:
-
-```js
-import pdf from 'astro-pdf'
-
-export default defineConfig({
-  integrations: [
-    pdf({
-      pages: { '/work': 'cv.pdf' },
-      // custom styles to print-optimize the /work page
-    }),
-  ],
-})
-```
-
-This generates `/dist/cv.pdf` at build time from the live `/work` page, printed with headless Chromium.
-The site page and the PDF are always in sync.
-
-Alternative if `astro-pdf` is too heavy for CF Pages build:
-
-- Keep Google Drive PDF link until content is finalised
-- Then add a GitHub Actions step to generate and commit `public/cv.pdf`
-
-## Skills Section
-
-Skills are a separate collection `src/content/skills/index.yaml`:
-
-```yaml
-groups:
-  - name: Mobile
-    skills: [React Native, Expo, EAS Build]
-  - name: Frontend
-    skills: [React, TypeScript, Astro, Next.js, Tailwind CSS]
-  - name: Backend
-    skills: [Node.js, GraphQL, REST]
-  - name: DevOps
-    skills: [GitHub Actions, Turborepo, Cloudflare, pnpm]
-```
-
-Rendered as styled chips grouped by domain, not a progress-bar gimmick.
-
-## Education
-
-Brief block at the bottom of `/work` — degree, school, year. No elaborate section needed.
+- **Roles** — one Markdown file per role in `src/content/work/`, typed by the `work` collection
+  schema in `src/content.config.ts` (`title`, `company`, `companyUrl?`, `via?`, `startDate`,
+  `endDate` nullable = present, `location`, `type`, `technologies[]`, `featured`). Reverse-chron,
+  current roles float to top. Bullets are the Markdown body.
+- **Skills, Earlier experience, Education** — typed inline arrays in `work.astro` (not collections;
+  they have no Markdown body). Education splits `degree` / `major` / `equivalency` / `school`.
+- **Logos** — company & school logos in `src/assets/logos/`, looked up by entry id / school slug
+  with a monogram fallback. See that folder's README.
+- **PDF** — `astro-pdf` snapshots `/work` → `dist/cv.pdf` at build time (config in
+  `astro.config.mjs`; needs `--no-sandbox` for the devcontainer/CI Chromium). The "Download CV"
+  button links to `/cv.pdf`, so page and PDF never drift.
