@@ -103,11 +103,13 @@ export default defineConfig({
 All copy lives in `src/content/` as typed Markdown/MDX collections:
 
 ```
-src/content/
-├── config.ts          # Zod schemas for each collection
-├── work/              # one .md per job/role
-├── projects/          # one .md per portfolio project
-└── skills/            # skills data (could be YAML)
+src/
+├── content.config.ts  # Zod schemas for each collection (Astro 6 location —
+│                       # NOT src/content/config.ts, the removed legacy path)
+└── content/
+    ├── work/          # one .md per job/role
+    ├── projects/      # one .md per portfolio project
+    └── skills/        # skills data (could be YAML)
 ```
 
 This means the CV page and a future PDF export share the same data source.

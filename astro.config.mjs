@@ -1,7 +1,9 @@
+import process from 'node:process'
 import { defineConfig, sessionDrivers } from 'astro/config'
 import tailwindcss from '@tailwindcss/vite'
 import cloudflare from '@astrojs/cloudflare'
 import sitemap from '@astrojs/sitemap'
+import pdf from 'astro-pdf'
 
 // https://astro.build/config
 export default defineConfig({
@@ -27,7 +29,32 @@ export default defineConfig({
     // locally (or use `wrangler dev` for that).
     platformProxy: { enabled: false },
   }),
-  integrations: [sitemap()],
+  integrations: [
+    sitemap(),
+    // CV PDF snapshot of /work. astro-pdf needs headless Chromium, which is
+    // flaky to provision in CI, so it's OPT-IN: regenerate locally with
+    // `pnpm cv:pdf` (sets GENERATE_PDF) and commit public/cv.pdf. Normal CI /
+    // deploy builds skip it and serve the committed static file — no browser
+    // dependency. The page and PDF stay in sync via the regen command.
+    ...(process.env.GENERATE_PDF
+      ? [
+          pdf({
+            // No-sandbox: devcontainer/CI Chromium lacks unprivileged user namespaces.
+            launch: { args: ['--no-sandbox'] },
+            baseOptions: {
+              path: 'cv.pdf',
+              waitUntil: 'networkidle0',
+              pdf: {
+                format: 'A4',
+                printBackground: true,
+                margin: { top: '1.5cm', bottom: '1.5cm', left: '1.5cm', right: '1.5cm' },
+              },
+            },
+            pages: { '/work': true },
+          }),
+        ]
+      : []),
+  ],
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'fr'],

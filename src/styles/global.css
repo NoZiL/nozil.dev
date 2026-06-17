@@ -43,3 +43,17 @@ html.dark {
   background-color: var(--color-dusk-bg);
   color: var(--color-violet-300);
 }
+
+/* Print / PDF (the build-time CV via astro-pdf renders with print media):
+   strip site chrome so the generated /cv.pdf is a clean CV, not a page snapshot. */
+@media print {
+  /* Force the light palette regardless of the dark class on <html>. */
+  html,
+  html.dark {
+    background-color: #fff;
+    color: var(--color-zinc-900);
+  }
+  [data-print-hide] {
+    display: none !important;
+  }
+}

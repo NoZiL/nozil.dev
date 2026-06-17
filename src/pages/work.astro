@@ -1,0 +1,302 @@
+---
+import { getCollection, render } from 'astro:content'
+import PageLayout from '../layouts/PageLayout.astro'
+
+// Reverse-chronological: current roles (no endDate) float to the top, then by
+// startDate descending.
+const roles = (await getCollection('work')).sort((a, b) => {
+  const aEnd = a.data.endDate?.getTime() ?? Infinity
+  const bEnd = b.data.endDate?.getTime() ?? Infinity
+  if (aEnd !== bEnd) return bEnd - aEnd
+  return b.data.startDate.getTime() - a.data.startDate.getTime()
+})
+
+const rendered = await Promise.all(roles.map(async (role) => ({ role, Content: (await render(role)).Content })))
+
+// Company & school logos: drop a file named after the entry id (e.g.
+// tennaxia.jpg, cnet.jpg) or school slug (polytech-lyon.jpg) into
+// src/assets/logos/. Missing logos fall back to a monogram, so the page never
+// shows a broken image. Eager glob → fingerprinted asset URL.
+const logoModules = import.meta.glob<string>('../assets/logos/*.{svg,jpg,jpeg,png}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+})
+const logoFor = (slug: string) =>
+  logoModules[`../assets/logos/${slug}.jpg`] ??
+  logoModules[`../assets/logos/${slug}.jpeg`] ??
+  logoModules[`../assets/logos/${slug}.png`] ??
+  logoModules[`../assets/logos/${slug}.svg`]
+
+// Two-letter monogram from the company name (handles "C+NET" → "C+").
+const monogram = (company: string) => company.replace(/[^A-Za-z0-9+]/g, '').slice(0, 2)
+
+const fmt = (d: Date) => d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+
+const typeLabel: Record<string, string> = {
+  'full-time': 'Full-time',
+  freelance: 'Freelance',
+  contract: 'Contract',
+  'open-source': 'Open source',
+}
+
+// Skills taxonomy — mirrors the CV (public/nicolas_zilli_resume_intl.pdf).
+const skillGroups = [
+  {
+    name: 'Mobile',
+    skills: ['React Native', 'Expo', 'TypeScript', 'TanStack Query', 'GraphQL', 'REST', 'Offline-first'],
+  },
+  { name: 'Frontend', skills: ['React.js', 'Next.js', 'Tailwind CSS'] },
+  {
+    name: 'Backend & Infra',
+    skills: ['Node.js', 'Elixir / Phoenix', 'Go', 'Docker', 'Kubernetes', 'PostgreSQL', 'Redis'],
+  },
+  { name: 'Auth & Services', skills: ['Auth0', 'Sendbird', 'Algolia', 'Brevo'] },
+  { name: 'Tooling & CI/CD', skills: ['GitHub Actions', 'GitLab CI', 'EAS', 'Turborepo', 'App Store / Play Store'] },
+  { name: 'AI-assisted development', skills: ['Claude Code', 'Custom skills & harnesses', 'Cursor'] },
+]
+
+// Terse roles that predate the detailed timeline above (CV "Earlier experience").
+const earlier = [
+  {
+    role: 'Full Stack Engineer',
+    org: 'beta.gouv.fr (Avril / France VAE)',
+    years: '2018–2019',
+    note: 'Built an MVP from scratch in Elixir / Phoenix; iterated with data-driven product management.',
+  },
+  {
+    role: 'Full Stack Engineer',
+    org: 'Figaro Classifieds',
+    years: '2016–2018',
+    note: 'Built recruitment tooling (questionnaires, applicant tracking) from scratch; DevOps role during a major infra migration. React, AngularJS.',
+  },
+  {
+    role: 'Software Engineer',
+    org: 'Alteca',
+    years: '2014–2015',
+    note: 'Client projects in the JVM ecosystem with JavaScript frontends.',
+  },
+]
+
+// `equivalency` = the international equivalent of the French diploma, shown as
+// a separate, muted line so the real diploma name stays primary.
+interface Education {
+  degree: string
+  major: string
+  equivalency: string
+  school: string
+  logo: string
+  year: string
+}
+const education: Education[] = [
+  {
+    degree: 'Diplôme d’ingénieur',
+    major: 'Computer Science',
+    equivalency: 'M.Sc. in Engineering',
+    school: 'Polytech Lyon',
+    logo: 'polytech-lyon',
+    year: '2011–2014',
+  },
+  {
+    degree: 'DUT',
+    major: 'Computer Science',
+    equivalency: '2-year Undergraduate Degree',
+    school: 'IUT Lyon 1',
+    logo: 'iut-lyon-1',
+    year: '2009–2011',
+  },
+]
+
+const chip =
+  'dark:border-dusk-border dark:bg-dusk-surface rounded-full border border-zinc-200 bg-white px-3 py-1 font-mono text-xs'
+const heading = 'text-sm font-medium tracking-wide text-zinc-400 uppercase dark:text-violet-500'
+const link = 'hover:text-accent dark:hover:text-accent-dark'
+---
+
+<PageLayout
+  title="Work & CV — Nicolas Zilli"
+  description="Work history and CV of Nicolas Zilli — Lead Mobile Engineer."
+>
+  <section class="flex flex-wrap items-start justify-between gap-4">
+    <h1 class="text-3xl font-semibold tracking-tight text-zinc-900 md:text-4xl dark:text-violet-100">Work &amp; CV</h1>
+    <div class="flex flex-wrap items-center gap-2" data-print-hide>
+      {/* Primary: hand-curated 1-page résumé (static, always available). */}
+      <a
+        href="/nicolas_zilli_resume_intl.docx"
+        download
+        class="bg-accent dark:bg-accent-dark rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 dark:text-violet-950 dark:hover:bg-violet-300"
+      >
+        Download CV (DOCX)
+      </a>
+      {/* Secondary: build-time PDF snapshot of this page. */}
+      <a
+        href="/cv.pdf"
+        download
+        class="hover:border-accent hover:text-accent dark:border-dusk-border dark:hover:border-accent-dark dark:hover:text-accent-dark rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-900 dark:text-violet-100"
+      >
+        Download as PDF
+      </a>
+    </div>
+  </section>
+
+  <section class="mt-6" aria-label="Summary">
+    <p class="max-w-prose text-lg">
+      Senior mobile &amp; full-stack engineer with 10+ years taking products from greenfield to production. Core
+      expertise in React Native and TypeScript, working at the system level — architecture, CI/CD, design systems, and
+      growing the team around me.
+    </p>
+    <p class="dark:border-dusk-border mt-4 rounded-lg border border-zinc-200 p-4 text-sm">
+      <span class="font-medium text-zinc-900 dark:text-violet-100">Open to</span> Staff / Lead Mobile Engineer roles, founding-engineer
+      positions, and freelance contracts. Based in Lyon, France · relocating to the Geneva / Lausanne area Q1 2027 · <span
+        class="font-mono text-xs">EU citizen</span
+      >.
+    </p>
+  </section>
+
+  <section class="mt-12" aria-labelledby="experience-heading">
+    <h2 id="experience-heading" class={heading}>Experience</h2>
+    <p class="mt-3 max-w-prose text-sm">
+      Several roles below ran through <strong class="font-medium text-zinc-900 dark:text-violet-100">WeDoProduct</strong
+      >, a holding I co-founded with fellow freelancers — we won contracts collectively and I held full technical
+      ownership of the work.
+    </p>
+    <ol class="dark:border-dusk-border mt-6 space-y-10 border-l border-zinc-200 pl-6">
+      {
+        rendered.map(({ role, Content }) => (
+          <li class="flex gap-4">
+            {logoFor(role.id) ? (
+              <img
+                src={logoFor(role.id)}
+                alt={`${role.data.company} logo`}
+                width="40"
+                height="40"
+                data-company-badge
+                class="dark:border-dusk-border mt-0.5 size-10 shrink-0 rounded-lg border border-zinc-200 bg-white object-contain p-1"
+              />
+            ) : (
+              <span
+                aria-hidden="true"
+                data-company-badge
+                class="dark:border-dusk-border mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white font-mono text-sm font-medium text-zinc-400"
+              >
+                {monogram(role.data.company)}
+              </span>
+            )}
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                <h3 class="text-lg font-semibold text-zinc-900 dark:text-violet-100">
+                  {role.data.title}
+                  {' · '}
+                  {role.data.companyUrl ? (
+                    <a href={role.data.companyUrl} class={link} target="_blank" rel="noopener noreferrer">
+                      {role.data.company}
+                    </a>
+                  ) : (
+                    <span>{role.data.company}</span>
+                  )}
+                  {role.data.via && (
+                    <span class="font-normal text-zinc-400 dark:text-violet-500"> · {role.data.via}</span>
+                  )}
+                </h3>
+                <p class="font-mono text-xs text-zinc-400 dark:text-violet-500">
+                  {fmt(role.data.startDate)} — {role.data.endDate ? fmt(role.data.endDate) : 'Present'}
+                </p>
+              </div>
+              <p class="mt-1 font-mono text-xs text-zinc-400 dark:text-violet-500">
+                {typeLabel[role.data.type]} · {role.data.location}
+              </p>
+              <div class="prose prose-sm dark:prose-invert mt-3 max-w-none">
+                <Content />
+              </div>
+              {role.data.technologies.length > 0 && (
+                <ul class="mt-4 flex flex-wrap gap-2">
+                  {role.data.technologies.map((tech) => (
+                    <li class={chip}>{tech}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="mt-16" aria-labelledby="earlier-heading">
+    <h2 id="earlier-heading" class={heading}>Earlier experience</h2>
+    <ul class="mt-6 space-y-4">
+      {
+        earlier.map((e) => (
+          <li>
+            <div class="flex flex-wrap items-baseline justify-between gap-x-3">
+              <span class="text-zinc-900 dark:text-violet-100">
+                {e.role} · {e.org}
+              </span>
+              <span class="font-mono text-xs text-zinc-400 dark:text-violet-500">{e.years}</span>
+            </div>
+            <p class="mt-1 text-sm">{e.note}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="mt-16" aria-labelledby="skills-heading">
+    <h2 id="skills-heading" class={heading}>Skills</h2>
+    <div class="mt-6 space-y-6">
+      {
+        skillGroups.map((group) => (
+          <div>
+            <h3 class="text-sm font-medium text-zinc-900 dark:text-violet-100">{group.name}</h3>
+            <ul class="mt-2 flex flex-wrap gap-2">
+              {group.skills.map((skill) => (
+                <li class={chip}>{skill}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="mt-16" aria-labelledby="education-heading">
+    <h2 id="education-heading" class={heading}>Education</h2>
+    <ul class="mt-6 space-y-4">
+      {
+        education.map((e) => (
+          <li class="flex gap-4">
+            {logoFor(e.logo) ? (
+              <img
+                src={logoFor(e.logo)}
+                alt={`${e.school} logo`}
+                width="40"
+                height="40"
+                data-school-badge
+                class="dark:border-dusk-border mt-0.5 size-10 shrink-0 rounded-lg border border-zinc-200 bg-white object-contain p-1"
+              />
+            ) : (
+              <span
+                aria-hidden="true"
+                data-school-badge
+                class="dark:border-dusk-border mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white font-mono text-sm font-medium text-zinc-400"
+              >
+                {monogram(e.school)}
+              </span>
+            )}
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-baseline justify-between gap-x-3">
+                <span>
+                  <span class="font-medium text-zinc-900 dark:text-violet-100">{e.degree}</span>
+                  <span class="text-zinc-600 dark:text-violet-300"> · {e.major}</span>
+                </span>
+                <span class="font-mono text-xs text-zinc-400 dark:text-violet-500">{e.year}</span>
+              </div>
+              <p class="text-accent dark:text-accent-dark mt-0.5 font-mono text-xs">≈ {e.equivalency}</p>
+              <p class="mt-0.5 text-sm">{e.school}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</PageLayout>

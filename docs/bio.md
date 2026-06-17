@@ -1,7 +1,12 @@
 # Bio Content
 
-**This file is the canonical source of truth** for bio content used on the site and in `src/content/`.
-Update here first; the site pulls from this file via the content collection.
+**This file is the canonical source for bio _copy_** — headline, taglines, long/short bio,
+og:description, current status. Update here first; the site pulls these strings from this file.
+
+> **Not** the source for work-history facts. Dates, titles, role stacks, and the skills taxonomy
+> come from the CV exports (`public/linkedin_profile_*.pdf` primary, the two résumé `.docx`
+> complementary) — see [cv-plan.md → Source of truth](./cv-plan.md). When the skills list here
+> drifts from those, the exports win.
 
 ## Sync with GitHub Profile README (NoZiL/Nozil)
 
