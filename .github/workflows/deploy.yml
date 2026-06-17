@@ -32,17 +32,11 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # astro-pdf snapshots /work → dist/client/cv.pdf at build time with headless
-      # Chromium. puppeteer's postinstall skips the Chrome download in CI, so
-      # install it explicitly (cached) — otherwise the PDF is silently skipped.
-      - name: Resolve puppeteer version
-        id: pp
-        run: echo "version=$(node -p "require('puppeteer/package.json').version")" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/puppeteer
-          key: puppeteer-${{ runner.os }}-${{ steps.pp.outputs.version }}
-      - run: pnpm exec puppeteer browsers install chrome
+      # astro-pdf snapshots /work → dist/client/cv.pdf with headless Chromium.
+      # puppeteer's postinstall leaves a partial cache dir in CI (version folder
+      # without the binary), so wipe it and install Chrome cleanly — otherwise
+      # astro-pdf finds no browser and silently skips the PDF.
+      - run: rm -rf ~/.cache/puppeteer && pnpm exec puppeteer browsers install chrome
       - run: pnpm build
       - name: Assert the CV PDF was generated
         run: test -f dist/client/cv.pdf || { echo "::error::astro-pdf did not produce dist/client/cv.pdf"; exit 1; }
@@ -94,15 +88,9 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # See preview job: ensure headless Chromium for the build-time PDF CV.
-      - name: Resolve puppeteer version
-        id: pp
-        run: echo "version=$(node -p "require('puppeteer/package.json').version")" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/puppeteer
-          key: puppeteer-${{ runner.os }}-${{ steps.pp.outputs.version }}
-      - run: pnpm exec puppeteer browsers install chrome
+      # See preview job: wipe the partial puppeteer cache dir and install Chrome
+      # cleanly so astro-pdf can generate the build-time PDF CV.
+      - run: rm -rf ~/.cache/puppeteer && pnpm exec puppeteer browsers install chrome
       - run: pnpm build
       - name: Assert the CV PDF was generated
         run: test -f dist/client/cv.pdf || { echo "::error::astro-pdf did not produce dist/client/cv.pdf"; exit 1; }
