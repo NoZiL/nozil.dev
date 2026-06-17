@@ -10,9 +10,7 @@
       "username": "node"
     },
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers-extra/features/claude-code:2": {
-      "version": "2.1.173"
-    },
+    "ghcr.io/devcontainers-extra/features/claude-code:2": {},
     "ghcr.io/jsburckhardt/devcontainer-features/rtk:1": {}
   },
   // Personal-setup mounts: gh + Claude Code credentials from the host. Docker
@@ -22,14 +20,16 @@
   "mounts": [
     "source=${localEnv:HOME}/.config/gh,target=/home/node/.config/gh,type=bind,consistency=cached",
     "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/.claude.json,target=/home/node/.claude.json,type=bind,consistency=cached"
+    "source=${localEnv:HOME}/.claude.json,target=/home/node/.claude.json,type=bind,consistency=cached",
+    // rtk analytics DB (gain/history) from the host, so token-savings data persists.
+    "source=${localEnv:HOME}/.local/share/rtk,target=/home/node/.local/share/rtk,type=bind,consistency=cached"
   ],
   "onCreateCommand": "if [ -w /usr/local/bin ]; then corepack enable; else sudo corepack enable; fi",
   "postStartCommand": "pnpm install",
   // postCreate runs before postStart, so install deps here first; the
   // postStart pnpm install is then a no-op on later starts. --with-deps
   // pulls the chromium system libraries (libnspr4 & co) via sudo apt.
-  "postCreateCommand": "pnpm install && pnpm exec playwright install --with-deps chromium && echo 'Dev container ready — run: pnpm dev'",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
   "forwardPorts": [4321, 8788],
   "portsAttributes": {
     "4321": {
