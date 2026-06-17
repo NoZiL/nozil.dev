@@ -13,11 +13,16 @@ test('work page loads with correct title and heading, no console errors', async 
   expect(errors).toEqual([])
 })
 
-test('download CV button is present and points to /cv.pdf', async ({ page }) => {
+test('CV download CTAs: primary DOCX + secondary PDF', async ({ page }) => {
   await page.goto('/work')
-  const downloadBtn = page.getByRole('link', { name: 'Download CV' })
-  await expect(downloadBtn).toHaveAttribute('href', '/cv.pdf')
-  await expect(downloadBtn).toHaveAttribute('download')
+
+  const docx = page.getByRole('link', { name: 'Download CV (DOCX)' })
+  await expect(docx).toHaveAttribute('href', '/nicolas_zilli_resume_intl.docx')
+  await expect(docx).toHaveAttribute('download')
+
+  const pdf = page.getByRole('link', { name: 'Download as PDF' })
+  await expect(pdf).toHaveAttribute('href', '/cv.pdf')
+  await expect(pdf).toHaveAttribute('download')
 })
 
 test('renders roles in reverse-chronological timeline with details', async ({ page }) => {

@@ -66,6 +66,9 @@ importers:
       prettier-plugin-astro:
         specifier: 0.14.1
         version: 0.14.1
+      puppeteer:
+        specifier: 24.43.1
+        version: 24.43.1(typescript@6.0.3)
       tailwindcss:
         specifier: 4.3.0
         version: 4.3.0
