@@ -24,13 +24,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm typecheck
-      # astro-pdf needs headless Chromium to snapshot /work → dist/client/cv.pdf.
-      # puppeteer's postinstall leaves a partial cache dir in CI (version folder
-      # without the binary), so wipe it and install Chrome cleanly.
-      - run: rm -rf ~/.cache/puppeteer && pnpm exec puppeteer browsers install chrome
       - run: pnpm build
-      - name: Assert the CV PDF was generated
-        run: test -f dist/client/cv.pdf || { echo "::error::astro-pdf did not produce dist/client/cv.pdf"; exit 1; }
 
   e2e:
     runs-on: ubuntu-latest

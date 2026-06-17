@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && NODE_OPTIONS=--dns-result-order=ipv4first astro build",
+    "cv:pdf": "GENERATE_PDF=1 NODE_OPTIONS=--dns-result-order=ipv4first astro build && cp dist/client/cv.pdf public/cv.pdf && echo 'Updated public/cv.pdf — commit it.'",
     "preview": "wrangler dev -c \"$(node scripts/cf-config.mjs)\" --ip 127.0.0.1 --port 8788",
     "deploy": "wrangler deploy -c \"$(node scripts/cf-config.mjs)\"",
     "typecheck": "astro check && tsc --noEmit",
@@ -40,7 +41,6 @@
     "eslint-plugin-jsx-a11y": "6.10.2",
     "prettier": "3.8.3",
     "prettier-plugin-astro": "0.14.1",
-    "puppeteer": "24.43.1",
     "tailwindcss": "4.3.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.60.0",

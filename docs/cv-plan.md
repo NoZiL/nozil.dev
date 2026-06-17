@@ -27,6 +27,17 @@ curated wording.
   they have no Markdown body). Education splits `degree` / `major` / `equivalency` / `school`.
 - **Logos** — company & school logos in `src/assets/logos/`, looked up by entry id / school slug
   with a monogram fallback. See that folder's README.
-- **PDF** — `astro-pdf` snapshots `/work` → `dist/cv.pdf` at build time (config in
-  `astro.config.mjs`; needs `--no-sandbox` for the devcontainer/CI Chromium). The "Download CV"
-  button links to `/cv.pdf`, so page and PDF never drift.
+- **Downloads** — two CTAs on `/work`:
+  - _primary_ **Download CV (DOCX)** → `public/nicolas_zilli_resume_intl.docx` (hand-curated 1-pager,
+    served statically).
+  - _secondary_ **Download as PDF** → `public/cv.pdf`.
+- **PDF generation** — `astro-pdf` snapshots `/work` → `cv.pdf`, but it's **opt-in** (gated behind
+  `GENERATE_PDF` in `astro.config.mjs`) because headless Chromium is flaky to provision in CI.
+  Regenerate locally and commit when `/work` changes:
+
+  ```bash
+  pnpm cv:pdf   # GENERATE_PDF=1 astro build → copies dist/client/cv.pdf to public/cv.pdf
+  ```
+
+  Normal `pnpm build` (CI + deploy) skips astro-pdf entirely and serves the committed
+  `public/cv.pdf` — no browser dependency, no flakiness.

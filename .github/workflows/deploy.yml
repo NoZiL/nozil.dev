@@ -32,14 +32,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # astro-pdf snapshots /work → dist/client/cv.pdf with headless Chromium.
-      # puppeteer's postinstall leaves a partial cache dir in CI (version folder
-      # without the binary), so wipe it and install Chrome cleanly — otherwise
-      # astro-pdf finds no browser and silently skips the PDF.
-      - run: rm -rf ~/.cache/puppeteer && pnpm exec puppeteer browsers install chrome
       - run: pnpm build
-      - name: Assert the CV PDF was generated
-        run: test -f dist/client/cv.pdf || { echo "::error::astro-pdf did not produce dist/client/cv.pdf"; exit 1; }
       - name: Upload preview version
         id: preview
         run: |
@@ -88,10 +81,5 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # See preview job: wipe the partial puppeteer cache dir and install Chrome
-      # cleanly so astro-pdf can generate the build-time PDF CV.
-      - run: rm -rf ~/.cache/puppeteer && pnpm exec puppeteer browsers install chrome
       - run: pnpm build
-      - name: Assert the CV PDF was generated
-        run: test -f dist/client/cv.pdf || { echo "::error::astro-pdf did not produce dist/client/cv.pdf"; exit 1; }
       - run: pnpm exec wrangler deploy -c "$(node scripts/cf-config.mjs)"
