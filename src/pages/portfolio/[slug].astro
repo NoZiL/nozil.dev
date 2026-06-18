@@ -3,6 +3,8 @@ import { getCollection, render } from 'astro:content'
 import type { GetStaticPaths } from 'astro'
 import PageLayout from '../../layouts/PageLayout.astro'
 import Chip from '../../components/Chip.astro'
+import ButtonLink from '../../components/ButtonLink.astro'
+import SectionHeading from '../../components/SectionHeading.astro'
 
 export const getStaticPaths = (async () => {
   const projects = await getCollection('projects')
@@ -37,12 +39,6 @@ const dateRange = `${fmt(startDate)} — ${endDate ? fmt(endDate) : 'Ongoing'}`
 
 const categoryLabel: Record<string, string> = { mobile: 'Mobile', web: 'Web', oss: 'OSS' }
 const typeLabel: Record<string, string> = { work: 'Work', oss: 'OSS', personal: 'Personal' }
-
-const meta = 'font-mono text-xs text-zinc-400 dark:text-violet-500'
-const ctaPrimary =
-  'bg-accent dark:bg-accent-dark rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 dark:text-violet-950 dark:hover:bg-violet-300'
-const ctaOutline =
-  'hover:border-accent hover:text-accent dark:border-dusk-border dark:hover:border-accent-dark dark:hover:text-accent-dark rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-900 dark:text-violet-100'
 ---
 
 <PageLayout title={`${title} — Nicolas Zilli`} description={tagline} ogImage={image}>
@@ -80,26 +76,26 @@ const ctaOutline =
         ))
       }
       <span class="text-accent dark:text-accent-dark font-mono text-xs">· {typeLabel[type]}</span>
-      {status === 'archived' && <span class={meta}>· Archived</span>}
+      {status === 'archived' && <span class="font-mono text-xs text-zinc-400 dark:text-violet-500">· Archived</span>}
     </div>
     <h1 class="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 md:text-4xl dark:text-violet-100">{title}</h1>
     <p class="mt-3 max-w-prose text-lg text-zinc-600 dark:text-violet-300">{tagline}</p>
 
     <dl class="mt-6 flex flex-wrap gap-x-8 gap-y-2">
       <div>
-        <dt class={meta}>Role</dt>
+        <dt class="font-mono text-xs text-zinc-400 dark:text-violet-500">Role</dt>
         <dd class="text-sm text-zinc-900 dark:text-violet-100">{role}</dd>
       </div>
       {
         client && (
           <div>
-            <dt class={meta}>Context</dt>
+            <dt class="font-mono text-xs text-zinc-400 dark:text-violet-500">Context</dt>
             <dd class="text-sm text-zinc-900 dark:text-violet-100">{client}</dd>
           </div>
         )
       }
       <div>
-        <dt class={meta}>When</dt>
+        <dt class="font-mono text-xs text-zinc-400 dark:text-violet-500">When</dt>
         <dd class="text-sm text-zinc-900 dark:text-violet-100">{dateRange}</dd>
       </div>
     </dl>
@@ -108,19 +104,24 @@ const ctaOutline =
       (links.length > 0 || github) && (
         <div class="mt-6 flex flex-wrap gap-3">
           {links.map((l, i) => (
-            <a href={l.url} target="_blank" rel="noopener noreferrer" class={i === 0 ? ctaPrimary : ctaOutline}>
-              {l.label}
-            </a>
-          ))}
-          {github && (
-            <a
-              href={github}
+            <ButtonLink
+              href={l.url}
+              variant={i === 0 ? 'primary' : 'outline'}
               target="_blank"
               rel="noopener noreferrer"
-              class={links.length === 0 ? ctaPrimary : ctaOutline}
+            >
+              {l.label}
+            </ButtonLink>
+          ))}
+          {github && (
+            <ButtonLink
+              href={github}
+              variant={links.length === 0 ? 'primary' : 'outline'}
+              target="_blank"
+              rel="noopener noreferrer"
             >
               GitHub
-            </a>
+            </ButtonLink>
           )}
         </div>
       )
@@ -134,7 +135,7 @@ const ctaOutline =
   {
     technologies.length > 0 && (
       <section class="mt-10">
-        <h2 class="text-sm font-medium tracking-wide text-zinc-400 uppercase dark:text-violet-500">Tech stack</h2>
+        <SectionHeading>Tech stack</SectionHeading>
         <ul class="mt-4 flex flex-wrap gap-2">
           {technologies.map((tech) => (
             <Chip size="md">{tech}</Chip>

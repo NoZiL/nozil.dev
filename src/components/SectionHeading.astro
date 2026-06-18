@@ -1,0 +1,12 @@
+---
+// Uppercase section label (e.g. "Featured work", "Experience", "Skills").
+interface Props {
+  id?: string
+}
+
+const { id } = Astro.props
+---
+
+<h2 id={id} class="text-sm font-medium tracking-wide text-zinc-400 uppercase dark:text-violet-500">
+  <slot />
+</h2>

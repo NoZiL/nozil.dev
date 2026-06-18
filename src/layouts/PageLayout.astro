@@ -10,8 +10,6 @@ interface Props {
 }
 
 const { title, description, ogImage } = Astro.props
-
-const link = 'hover:text-accent dark:hover:text-accent-dark'
 ---
 
 <BaseLayout title={title} description={description} ogImage={ogImage}>
@@ -19,9 +17,9 @@ const link = 'hover:text-accent dark:hover:text-accent-dark'
     <header class="flex items-center justify-between py-6" data-print-hide>
       <a href="/" class="font-mono text-sm font-medium text-zinc-900 dark:text-violet-100">nozil.dev</a>
       <nav class="flex items-center gap-3 text-sm sm:gap-4" aria-label="Main">
-        <a href="/work" class={link}>Work</a>
-        <a href="/portfolio" class={link}>Portfolio</a>
-        <a href="/contact" class={link}>Contact</a>
+        <a href="/work" class="hover:text-accent dark:hover:text-accent-dark">Work</a>
+        <a href="/portfolio" class="hover:text-accent dark:hover:text-accent-dark">Portfolio</a>
+        <a href="/contact" class="hover:text-accent dark:hover:text-accent-dark">Contact</a>
         <ThemeToggle />
         {/* Placeholder — becomes the locale toggle with i18n (#7) */}
         <span class="font-mono text-xs text-zinc-400 dark:text-violet-500" title="Version française — coming soon">
@@ -37,14 +35,16 @@ const link = 'hover:text-accent dark:hover:text-accent-dark'
       data-print-hide
     >
       <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <a href="https://github.com/nozil" class={link}>GitHub</a>
-        <a href="https://www.linkedin.com/in/nicolaszilli" class={link}>LinkedIn</a>
+        <a href="https://github.com/nozil" class="hover:text-accent dark:hover:text-accent-dark">GitHub</a>
+        <a href="https://www.linkedin.com/in/nicolaszilli" class="hover:text-accent dark:hover:text-accent-dark"
+          >LinkedIn</a
+        >
         <EmailReveal />
       </div>
       <p>
-        Built with <a href="https://astro.build" class={link}>Astro</a> &amp; <a
+        Built with <a href="https://astro.build" class="hover:text-accent dark:hover:text-accent-dark">Astro</a> &amp; <a
           href="https://workers.cloudflare.com"
-          class={link}>Cloudflare</a
+          class="hover:text-accent dark:hover:text-accent-dark">Cloudflare</a
         >.
       </p>
     </footer>
