@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content'
 import PageLayout from '../layouts/PageLayout.astro'
 import ProjectCard from '../components/ProjectCard.astro'
+import FilterChip from '../components/FilterChip.astro'
 
 // Featured first, then most recent (ongoing roles — no endDate — float up),
 // then by start date. `order` breaks ties among featured.
@@ -39,14 +40,9 @@ const filters = [
       {
         filters.map((f, i) => (
           <li>
-            <button
-              type="button"
-              data-filter={f.id}
-              aria-pressed={i === 0 ? 'true' : 'false'}
-              class="dark:border-dusk-border rounded-full border border-zinc-200 px-3 py-1 font-mono text-xs text-zinc-600 transition-colors aria-pressed:border-transparent aria-pressed:bg-accent aria-pressed:text-white dark:text-violet-300 dark:aria-pressed:bg-accent-dark dark:aria-pressed:text-violet-950"
-            >
+            <FilterChip filter={f.id} pressed={i === 0}>
               {f.label}
-            </button>
+            </FilterChip>
           </li>
         ))
       }

@@ -1,0 +1,32 @@
+---
+import { tv } from 'tailwind-variants'
+
+// Pill button rendered as an anchor. The single source for the accent CTA used
+// on the home, work, and project-detail pages. Extra attributes (download,
+// target, rel) and a `class` for layout tweaks pass straight through.
+interface Props {
+  href: string
+  variant?: 'primary' | 'outline'
+  class?: string
+  [key: string]: unknown
+}
+
+const button = tv({
+  base: 'rounded-lg px-4 py-2 text-center text-sm font-medium',
+  variants: {
+    variant: {
+      primary:
+        'bg-accent dark:bg-accent-dark text-white hover:bg-violet-700 dark:text-violet-950 dark:hover:bg-violet-300',
+      outline:
+        'hover:border-accent hover:text-accent dark:border-dusk-border dark:hover:border-accent-dark dark:hover:text-accent-dark border border-zinc-200 text-zinc-900 dark:text-violet-100',
+    },
+  },
+  defaultVariants: { variant: 'primary' },
+})
+
+const { variant, class: extra, ...attrs } = Astro.props
+---
+
+<a {...attrs} class={button({ variant, class: extra })}>
+  <slot />
+</a>
