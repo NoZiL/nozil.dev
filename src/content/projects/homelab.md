@@ -8,7 +8,8 @@ technologies: [Docker, Home Assistant, Jellyfin, LLDAP, Linux]
 categories: []
 image: /projects/homeassistant.png
 order: 4
-status: private
+type: personal
+status: live
 ---
 
 ## Overview

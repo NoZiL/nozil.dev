@@ -12,6 +12,7 @@ technologies: [React Native, Expo, TypeScript, Brevo, EAS]
 categories: [mobile]
 image: /projects/talentpicker.png
 order: 3
+type: work
 status: archived
 ---
 

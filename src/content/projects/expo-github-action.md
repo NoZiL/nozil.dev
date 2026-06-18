@@ -9,6 +9,7 @@ client: Open source
 technologies: [TypeScript, GitHub Actions, Expo, EAS]
 categories: [oss]
 order: 5
+type: oss
 status: live
 ---
 

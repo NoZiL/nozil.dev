@@ -15,6 +15,7 @@ categories: [oss, web]
 image: /projects/avril.jpg
 featured: true
 order: 2
+type: work
 status: live
 ---
 

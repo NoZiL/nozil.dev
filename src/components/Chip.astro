@@ -1,0 +1,21 @@
+---
+// Small pill used for tech tags on cards (sm) and detail pages (md).
+// Single source for the chip styling shared across ProjectCard and [slug].
+interface Props {
+  size?: 'sm' | 'md'
+  class?: string
+}
+
+const { size = 'sm', class: extra } = Astro.props
+const pad = size === 'md' ? 'px-3 py-1' : 'px-2.5 py-0.5'
+---
+
+<li
+  class:list={[
+    'dark:border-dusk-border dark:bg-dusk-surface rounded-full border border-zinc-200 bg-white font-mono text-xs',
+    pad,
+    extra,
+  ]}
+>
+  <slot />
+</li>

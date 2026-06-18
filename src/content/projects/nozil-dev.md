@@ -13,6 +13,7 @@ categories: [web]
 image: /projects/nozil.dev.png
 featured: true
 order: 0
+type: personal
 status: live
 ---
 

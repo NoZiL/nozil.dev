@@ -1,12 +1,13 @@
 ---
 import type { CollectionEntry } from 'astro:content'
+import Chip from './Chip.astro'
 
 interface Props {
   project: CollectionEntry<'projects'>
 }
 
 const { project } = Astro.props
-const { title, tagline, technologies, categories, image, github, links, status } = project.data
+const { title, tagline, technologies, categories, image, github, links, type, status } = project.data
 const href = `/portfolio/${project.id}`
 
 // Two-letter monogram for the thumbnail fallback (handles "nozil.dev" → "NO").
@@ -16,21 +17,16 @@ const monogram = title
   .toUpperCase()
 
 const categoryLabel: Record<string, string> = { mobile: 'Mobile', web: 'Web', oss: 'OSS' }
-
-const statusLabel: Record<string, string> = { live: 'Live', archived: 'Archived', private: 'Personal' }
+const typeLabel: Record<string, string> = { work: 'Work', oss: 'OSS', personal: 'Personal' }
 
 // Show at most four tech chips on the card; the detail page lists them all.
 const techPreview = technologies.slice(0, 4)
 const techOverflow = technologies.length - techPreview.length
 
-const chip =
-  'dark:border-dusk-border dark:bg-dusk-surface rounded-full border border-zinc-200 bg-white px-2.5 py-0.5 font-mono text-xs'
 const extLink = 'hover:text-accent dark:hover:text-accent-dark font-mono text-xs text-zinc-500 dark:text-violet-400'
 ---
 
 <article
-  data-project-card
-  data-categories={categories.join(' ')}
   class="dark:border-dusk-border dark:bg-dusk-surface group flex flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white transition-transform hover:-translate-y-0.5"
 >
   <a href={href} class="block" aria-label={`${title} — view project`}>
@@ -52,7 +48,10 @@ const extLink = 'hover:text-accent dark:hover:text-accent-dark font-mono text-xs
       <h3 class="text-lg font-semibold text-zinc-900 dark:text-violet-100">
         <a href={href} class="hover:text-accent dark:hover:text-accent-dark">{title}</a>
       </h3>
-      <span class="mt-1 shrink-0 font-mono text-xs text-zinc-400 dark:text-violet-500">{statusLabel[status]}</span>
+      <span class="mt-1 flex shrink-0 items-center gap-1.5 font-mono text-xs">
+        <span class="text-accent dark:text-accent-dark">{typeLabel[type]}</span>
+        {status === 'archived' && <span class="text-zinc-400 dark:text-violet-500">· Archived</span>}
+      </span>
     </div>
     <p class="mt-2 flex-1 text-sm text-zinc-600 dark:text-violet-300">{tagline}</p>
 
@@ -60,9 +59,9 @@ const extLink = 'hover:text-accent dark:hover:text-accent-dark font-mono text-xs
       techPreview.length > 0 && (
         <ul class="mt-4 flex flex-wrap gap-2">
           {techPreview.map((tech) => (
-            <li class={chip}>{tech}</li>
+            <Chip>{tech}</Chip>
           ))}
-          {techOverflow > 0 && <li class={`${chip} text-zinc-400 dark:text-violet-500`}>+{techOverflow}</li>}
+          {techOverflow > 0 && <Chip class="text-zinc-400 dark:text-violet-500">+{techOverflow}</Chip>}
         </ul>
       )
     }

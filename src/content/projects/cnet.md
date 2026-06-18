@@ -9,7 +9,8 @@ technologies: [React Native, Expo, TypeScript, GraphQL, MDM/EMM]
 categories: [mobile]
 image: /projects/c+net.tablette.jpeg
 order: 6
-status: private
+type: work
+status: live
 ---
 
 ## Overview

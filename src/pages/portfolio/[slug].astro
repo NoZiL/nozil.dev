@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content'
 import type { GetStaticPaths } from 'astro'
 import PageLayout from '../../layouts/PageLayout.astro'
+import Chip from '../../components/Chip.astro'
 
 export const getStaticPaths = (async () => {
   const projects = await getCollection('projects')
@@ -9,7 +10,7 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths
 
 const { project } = Astro.props
-const { title, tagline, technologies, categories, image, github, links, role, client, status, startDate, endDate } =
+const { title, tagline, technologies, categories, image, github, links, role, client, type, status, startDate, endDate } =
   project.data
 const { Content } = await render(project)
 
@@ -22,10 +23,8 @@ const fmt = (d: Date) => d.toLocaleDateString('en-GB', { month: 'short', year: '
 const dateRange = `${fmt(startDate)} — ${endDate ? fmt(endDate) : 'Ongoing'}`
 
 const categoryLabel: Record<string, string> = { mobile: 'Mobile', web: 'Web', oss: 'OSS' }
-const statusLabel: Record<string, string> = { live: 'Live', archived: 'Archived', private: 'Personal' }
+const typeLabel: Record<string, string> = { work: 'Work', oss: 'OSS', personal: 'Personal' }
 
-const chip =
-  'dark:border-dusk-border dark:bg-dusk-surface rounded-full border border-zinc-200 bg-white px-3 py-1 font-mono text-xs'
 const meta = 'font-mono text-xs text-zinc-400 dark:text-violet-500'
 const ctaPrimary =
   'bg-accent dark:bg-accent-dark rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 dark:text-violet-950 dark:hover:bg-violet-300'
@@ -67,7 +66,8 @@ const ctaOutline =
           <span class="text-accent dark:text-accent-dark font-mono text-xs">{categoryLabel[c]}</span>
         ))
       }
-      <span class={meta}>· {statusLabel[status]}</span>
+      <span class="text-accent dark:text-accent-dark font-mono text-xs">· {typeLabel[type]}</span>
+      {status === 'archived' && <span class={meta}>· Archived</span>}
     </div>
     <h1 class="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 md:text-4xl dark:text-violet-100">{title}</h1>
     <p class="mt-3 max-w-prose text-lg text-zinc-600 dark:text-violet-300">{tagline}</p>
@@ -124,7 +124,7 @@ const ctaOutline =
         <h2 class="text-sm font-medium tracking-wide text-zinc-400 uppercase dark:text-violet-500">Tech stack</h2>
         <ul class="mt-4 flex flex-wrap gap-2">
           {technologies.map((tech) => (
-            <li class={chip}>{tech}</li>
+            <Chip size="md">{tech}</Chip>
           ))}
         </ul>
       </section>

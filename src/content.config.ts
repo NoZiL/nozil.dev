@@ -49,7 +49,11 @@ const projects = defineCollection({
     featured: z.boolean().default(false),
     // Lower sorts first among featured cards (ties break by recency).
     order: z.number().default(0),
-    status: z.enum(['live', 'archived', 'private']).default('live'),
+    // Nature of the project — primary badge (Work · OSS · Personal).
+    type: z.enum(['work', 'oss', 'personal']),
+    // Lifecycle, shown muted alongside the type badge. Orthogonal to repo
+    // visibility — a private-repo project can still be live or archived.
+    status: z.enum(['live', 'archived']).default('live'),
   }),
 })
 

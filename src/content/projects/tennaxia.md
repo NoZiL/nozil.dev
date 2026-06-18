@@ -14,6 +14,7 @@ categories: [mobile]
 image: /projects/tennaxia.png
 featured: true
 order: 1
+type: work
 status: live
 ---
 
