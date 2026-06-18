@@ -24,8 +24,7 @@
   },
   "remoteEnv": {
     "CLOUDFLARE_ACCOUNT_ID": "${localEnv:CLOUDFLARE_ACCOUNT_ID}",
-    "CLOUDFLARE_API_TOKEN": "${localEnv:CLOUDFLARE_API_TOKEN}",
-    "RESEND_API_KEY": "${localEnv:RESEND_API_KEY}"
+    "CLOUDFLARE_API_TOKEN": "${localEnv:CLOUDFLARE_API_TOKEN}"
   },
   "initializeCommand": "[ -f ${localWorkspaceFolder}/.devcontainer/.env ] || cp ${localWorkspaceFolder}/.devcontainer/.env.example ${localWorkspaceFolder}/.devcontainer/.env",
   "onCreateCommand": "if [ -w /usr/local/bin ]; then corepack enable; else sudo corepack enable; fi",

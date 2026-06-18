@@ -1,0 +1,195 @@
+---
+import PageLayout from '../layouts/PageLayout.astro'
+import SectionHeading from '../components/SectionHeading.astro'
+import EmailReveal from '../components/EmailReveal.astro'
+---
+
+<PageLayout
+  title="Contact — Nicolas Zilli"
+  description="Get in touch with Nicolas Zilli for freelance work, consulting, or just to say hi."
+>
+  <SectionHeading>Get in touch</SectionHeading>
+  <p class="mt-2 max-w-prose text-zinc-600 dark:text-violet-300">
+    Looking for a freelance engineer, have a project idea, or just want to connect? Fill in the form below — I reply
+    within 2 business days.
+  </p>
+
+  <div id="form-wrap" class="mt-8">
+    <form id="contact-form" novalidate class="max-w-lg space-y-5">
+      <div>
+        <label for="name" class="block text-sm font-medium text-zinc-900 dark:text-violet-100">Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          autocomplete="name"
+          required
+          class="dark:border-dusk-border dark:bg-dusk-surface mt-1 block min-h-11 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:text-violet-100 dark:placeholder-violet-500 dark:focus:ring-violet-400"
+        />
+        <p id="error-name" class="mt-1 text-sm text-red-600 dark:text-red-400" hidden></p>
+      </div>
+
+      <div>
+        <label for="email" class="block text-sm font-medium text-zinc-900 dark:text-violet-100">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          autocomplete="email"
+          required
+          class="dark:border-dusk-border dark:bg-dusk-surface mt-1 block min-h-11 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:text-violet-100 dark:placeholder-violet-500 dark:focus:ring-violet-400"
+        />
+        <p id="error-email" class="mt-1 text-sm text-red-600 dark:text-red-400" hidden></p>
+      </div>
+
+      <div>
+        <label for="subject" class="block text-sm font-medium text-zinc-900 dark:text-violet-100">
+          Subject <span class="font-normal text-zinc-400 dark:text-violet-500">(optional)</span>
+        </label>
+        <select
+          id="subject"
+          name="subject"
+          class="dark:border-dusk-border dark:bg-dusk-surface mt-1 block min-h-11 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:text-violet-100 dark:focus:ring-violet-400"
+        >
+          <option value="">Select a topic…</option>
+          <option value="Freelance inquiry">Freelance inquiry</option>
+          <option value="Just saying hi">Just saying hi</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="message" class="block text-sm font-medium text-zinc-900 dark:text-violet-100">Message</label>
+        <textarea
+          id="message"
+          name="message"
+          rows="5"
+          required
+          class="dark:border-dusk-border dark:bg-dusk-surface mt-1 block w-full resize-y rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:text-violet-100 dark:placeholder-violet-500 dark:focus:ring-violet-400"
+        ></textarea>
+        <p id="error-message" class="mt-1 text-sm text-red-600 dark:text-red-400" hidden></p>
+      </div>
+
+      {/* Honeypot — bots fill this, humans never see it */}
+      <div class="hidden" aria-hidden="true">
+        <input type="text" name="_honey" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <div
+        id="server-error"
+        hidden
+        role="alert"
+        class="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950"
+      >
+        <p class="text-sm text-red-700 dark:text-red-300">Something went wrong. Try again or reach me directly:</p>
+        <div class="mt-2 text-sm">
+          <EmailReveal suffix="contact" />
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        id="submit-btn"
+        class="min-h-11 rounded-lg bg-violet-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-violet-400 dark:text-violet-950 dark:hover:bg-violet-300"
+      >
+        Send message
+      </button>
+    </form>
+  </div>
+
+  <div id="success-wrap" hidden>
+    <div class="max-w-lg rounded-lg border border-green-200 bg-green-50 p-6 dark:border-green-900 dark:bg-green-950">
+      <p class="font-medium text-green-800 dark:text-green-100">Message sent!</p>
+      <p class="mt-1 text-sm text-green-700 dark:text-green-300">Thanks — I'll reply within 2 business days.</p>
+    </div>
+  </div>
+
+  <p class="mt-8 text-sm text-zinc-400 dark:text-violet-500">Your message goes directly to Nicolas. Never shared.</p>
+</PageLayout>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement | null
+  const formWrap = document.getElementById('form-wrap')
+  const successWrap = document.getElementById('success-wrap')
+  const serverError = document.getElementById('server-error')
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement | null
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    clearErrors()
+
+    const fd = new FormData(form!)
+    const name = ((fd.get('name') as string | null) ?? '').trim()
+    const email = ((fd.get('email') as string | null) ?? '').trim()
+    const subject = ((fd.get('subject') as string | null) ?? '').trim()
+    const message = ((fd.get('message') as string | null) ?? '').trim()
+    const _honey = (fd.get('_honey') as string | null) ?? ''
+
+    let valid = true
+    if (!name) {
+      showError('name', 'Name is required')
+      valid = false
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showError('email', 'A valid email is required')
+      valid = false
+    }
+    if (message.length < 20) {
+      showError('message', 'Message must be at least 20 characters')
+      valid = false
+    }
+    if (!valid) return
+
+    setSubmitting(true)
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, subject: subject || undefined, message, _honey }),
+      })
+
+      if (res.ok) {
+        if (formWrap) formWrap.hidden = true
+        if (successWrap) successWrap.hidden = false
+        return
+      }
+
+      type ErrorBody = { error?: string; issues?: Record<string, string[]> }
+      const data = (await res.json()) as ErrorBody
+      if (data.issues) {
+        for (const [field, msgs] of Object.entries(data.issues)) {
+          showError(field, msgs[0] ?? 'Invalid value')
+        }
+      } else {
+        if (serverError) serverError.hidden = false
+      }
+    } catch {
+      if (serverError) serverError.hidden = false
+    }
+
+    setSubmitting(false)
+  })
+
+  function setSubmitting(on: boolean) {
+    if (!submitBtn) return
+    submitBtn.disabled = on
+    submitBtn.textContent = on ? 'Sending…' : 'Send message'
+  }
+
+  function showError(field: string, msg: string) {
+    const el = document.getElementById(`error-${field}`)
+    if (el) {
+      el.textContent = msg
+      el.hidden = false
+    }
+  }
+
+  function clearErrors() {
+    if (serverError) serverError.hidden = true
+    document.querySelectorAll('[id^="error-"]').forEach((el) => {
+      ;(el as HTMLElement).hidden = true
+      el.textContent = ''
+    })
+  }
+</script>
