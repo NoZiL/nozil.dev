@@ -10,8 +10,21 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths
 
 const { project } = Astro.props
-const { title, tagline, technologies, categories, image, github, links, role, client, type, status, startDate, endDate } =
-  project.data
+const {
+  title,
+  tagline,
+  technologies,
+  categories,
+  image,
+  github,
+  links,
+  role,
+  client,
+  type,
+  status,
+  startDate,
+  endDate,
+} = project.data
 const { Content } = await render(project)
 
 const monogram = title
