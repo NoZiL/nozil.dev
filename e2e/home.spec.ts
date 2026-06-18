@@ -13,7 +13,7 @@ test('home page loads with correct title and no console errors', async ({ page }
   expect(errors).toEqual([])
 })
 
-test('hero, skill chips and featured empty state are visible', async ({ page }) => {
+test('hero, skill chips and featured project cards are visible', async ({ page }) => {
   await page.goto('/')
 
   const avatar = page.getByRole('img', { name: 'Portrait of Nicolas Zilli' })
@@ -24,7 +24,10 @@ test('hero, skill chips and featured empty state are visible', async ({ page }) 
   await expect(page.getByText('Lead Mobile Engineer · Freelance Software Developer')).toBeVisible()
   await expect(page.getByText(/Lyon-based developer/)).toBeVisible()
   await expect(page.getByRole('listitem').filter({ hasText: 'React Native' })).toBeVisible()
+
+  // Featured work now renders up to 3 project cards (see portfolio.spec.ts).
   await expect(page.getByRole('heading', { name: 'Featured work' })).toBeVisible()
+  await expect(page.locator('section[aria-labelledby="featured-heading"] > ul > li')).toHaveCount(3)
 })
 
 test('nav and CTA links point to the right routes', async ({ page }) => {

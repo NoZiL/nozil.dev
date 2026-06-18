@@ -6,14 +6,15 @@ import EmailReveal from '../components/EmailReveal.astro'
 interface Props {
   title: string
   description?: string
+  ogImage?: string
 }
 
-const { title, description } = Astro.props
+const { title, description, ogImage } = Astro.props
 
 const link = 'hover:text-accent dark:hover:text-accent-dark'
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} ogImage={ogImage}>
   <div class="mx-auto flex min-h-screen max-w-3xl flex-col px-6">
     <header class="flex items-center justify-between py-6" data-print-hide>
       <a href="/" class="font-mono text-sm font-medium text-zinc-900 dark:text-violet-100">nozil.dev</a>
