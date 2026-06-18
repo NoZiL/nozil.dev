@@ -10,25 +10,26 @@
       "username": "node"
     },
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers-extra/features/claude-code:2": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
     "ghcr.io/jsburckhardt/devcontainer-features/rtk:1": {}
   },
-  // Personal-setup mounts: gh + Claude Code credentials from the host. Docker
-  // creates missing host paths as empty dirs, so the container still starts
-  // without them — delete these lines if you don't use these tools, or log in
-  // inside the container (`gh auth login`) instead.
   "mounts": [
-    "source=${localEnv:HOME}/.config/gh,target=/home/node/.config/gh,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/.claude.json,target=/home/node/.claude.json,type=bind,consistency=cached",
-    // rtk analytics DB (gain/history) from the host, so token-savings data persists.
-    "source=${localEnv:HOME}/.local/share/rtk,target=/home/node/.local/share/rtk,type=bind,consistency=cached"
+    "source=nozil-claude,target=/home/node/.claude,type=volume",
+    "source=nozil-gh,target=/home/node/.config/gh,type=volume",
+    "source=nozil-rtk,target=/home/node/.local/share/rtk,type=volume"
   ],
+  "runArgs": ["--env-file", "${localWorkspaceFolder}/.devcontainer/.env"],
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude"
+  },
+  "remoteEnv": {
+    "CLOUDFLARE_ACCOUNT_ID": "${localEnv:CLOUDFLARE_ACCOUNT_ID}",
+    "CLOUDFLARE_API_TOKEN": "${localEnv:CLOUDFLARE_API_TOKEN}",
+    "RESEND_API_KEY": "${localEnv:RESEND_API_KEY}"
+  },
+  "initializeCommand": "[ -f ${localWorkspaceFolder}/.devcontainer/.env ] || cp ${localWorkspaceFolder}/.devcontainer/.env.example ${localWorkspaceFolder}/.devcontainer/.env",
   "onCreateCommand": "if [ -w /usr/local/bin ]; then corepack enable; else sudo corepack enable; fi",
   "postStartCommand": "pnpm install",
-  // postCreate runs before postStart, so install deps here first; the
-  // postStart pnpm install is then a no-op on later starts. --with-deps
-  // pulls the chromium system libraries (libnspr4 & co) via sudo apt.
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "forwardPorts": [4321, 8788],
   "portsAttributes": {
@@ -51,7 +52,6 @@
         "cloudflare.cloudflare-workers-bindings",
         "GitHub.vscode-pull-request-github",
         "GitHub.vscode-github-actions",
-        "anthropic.claude-code",
         "tamasfe.even-better-toml"
       ],
       "settings": {
@@ -71,10 +71,5 @@
         "terminal.integrated.defaultProfile.linux": "zsh"
       }
     }
-  },
-  "remoteEnv": {
-    "CLOUDFLARE_ACCOUNT_ID": "${localEnv:CLOUDFLARE_ACCOUNT_ID}",
-    "CLOUDFLARE_API_TOKEN": "${localEnv:CLOUDFLARE_API_TOKEN}",
-    "RESEND_API_KEY": "${localEnv:RESEND_API_KEY}"
   }
 }
