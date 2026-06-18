@@ -1,23 +1,15 @@
 ---
 import { tv } from 'tailwind-variants'
+import { pill } from './pill'
 
-// Small pill used for tech tags on cards (sm) and detail pages (md).
-// Single source for the chip styling shared across ProjectCard and [slug].
+// Small static tag used for tech/skill pills on cards, the home page, and
+// detail pages. Shares its geometry with FilterChip via the `pill` base.
 interface Props {
   size?: 'sm' | 'md'
   class?: string
 }
 
-const chip = tv({
-  base: 'dark:border-dusk-border dark:bg-dusk-surface rounded-full border border-zinc-200 bg-white font-mono text-xs',
-  variants: {
-    size: {
-      sm: 'px-2.5 py-0.5',
-      md: 'px-3 py-1',
-    },
-  },
-  defaultVariants: { size: 'sm' },
-})
+const chip = tv({ extend: pill, base: 'dark:bg-dusk-surface bg-white' })
 
 const { size, class: extra } = Astro.props
 ---

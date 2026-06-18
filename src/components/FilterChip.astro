@@ -1,0 +1,24 @@
+---
+import { tv } from 'tailwind-variants'
+import { pill } from './pill'
+
+// Interactive category-filter toggle. Shares the pill geometry with Chip but
+// renders a <button> with aria-pressed state styling; the data-filter hook is
+// read by the client-side filter script in portfolio.astro.
+interface Props {
+  filter: string
+  pressed?: boolean
+}
+
+const filterChip = tv({
+  extend: pill,
+  base: 'text-zinc-600 transition-colors aria-pressed:border-transparent aria-pressed:bg-accent aria-pressed:text-white dark:text-violet-300 dark:aria-pressed:bg-accent-dark dark:aria-pressed:text-violet-950',
+  defaultVariants: { size: 'md' },
+})
+
+const { filter, pressed = false } = Astro.props
+---
+
+<button type="button" data-filter={filter} aria-pressed={pressed ? 'true' : 'false'} class={filterChip()}>
+  <slot />
+</button>
