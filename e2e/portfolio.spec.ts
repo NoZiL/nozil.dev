@@ -74,7 +74,7 @@ test('home page shows featured project cards linking to detail pages', async ({ 
 })
 
 // Layout-critical mobile gate (docs/ux-plan.md → Responsive). Runs on Pixel 7.
-test('no horizontal overflow and grid collapses to one column on mobile', async ({ page }) => {
+test('no horizontal overflow and grid collapses to one column on mobile', async ({ page }, testInfo) => {
   await page.goto('/portfolio')
 
   const overflow = await page.evaluate(
@@ -82,11 +82,14 @@ test('no horizontal overflow and grid collapses to one column on mobile', async 
   )
   expect(overflow).toBe(0)
 
-  // Single-column: first two visible cards stack vertically (different rows)
-  const cards = page.locator('#project-grid > li')
-  const first = await cards.nth(0).boundingBox()
-  const second = await cards.nth(1).boundingBox()
-  expect(first && second && second.y).toBeGreaterThan((first?.y ?? 0) + (first?.height ?? 0) - 1)
+  // Single-column collapse is a mobile-viewport concern; desktop runs the 2-col grid.
+  if (testInfo.project.name === 'mobile') {
+    // first two visible cards stack vertically (different rows)
+    const cards = page.locator('#project-grid > li')
+    const first = await cards.nth(0).boundingBox()
+    const second = await cards.nth(1).boundingBox()
+    expect(first && second && second.y).toBeGreaterThan((first?.y ?? 0) + (first?.height ?? 0) - 1)
+  }
 
   // Filter chips wrap, stay reachable
   await expect(page.getByRole('button', { name: 'Mobile' })).toBeVisible()

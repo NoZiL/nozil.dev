@@ -23,7 +23,9 @@ test('hero, skill chips and featured project cards are visible', async ({ page }
 
   await expect(page.getByText('Lead Mobile Engineer · Freelance Software Developer')).toBeVisible()
   await expect(page.getByText(/Lyon-based developer/)).toBeVisible()
-  await expect(page.getByRole('listitem').filter({ hasText: 'React Native' })).toBeVisible()
+  await expect(
+    page.getByRole('region', { name: 'Key skills' }).getByRole('listitem').filter({ hasText: 'React Native' })
+  ).toBeVisible()
 
   // Featured work now renders up to 3 project cards (see portfolio.spec.ts).
   await expect(page.getByRole('heading', { name: 'Featured work' })).toBeVisible()
