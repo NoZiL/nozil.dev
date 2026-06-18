@@ -10,13 +10,13 @@
       "username": "node"
     },
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
-    "ghcr.io/jsburckhardt/devcontainer-features/rtk:1": {}
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
   },
   "mounts": [
-    "source=nozil-claude,target=/home/node/.claude,type=volume",
-    "source=nozil-gh,target=/home/node/.config/gh,type=volume",
-    "source=nozil-rtk,target=/home/node/.local/share/rtk,type=volume"
+    "source=nozil.dev-claude,target=/home/node/.claude,type=volume",
+    "source=nozil.dev-gh,target=/home/node/.config/gh,type=volume",
+    "source=nozil.dev-rtk,target=/home/node/.local/share/rtk,type=volume",
+    "source=nozil.dev-ctx7,target=/home/node/.config/context7,type=volume"
   ],
   "runArgs": ["--env-file", "${localWorkspaceFolder}/.devcontainer/.env"],
   "containerEnv": {
