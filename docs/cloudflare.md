@@ -181,6 +181,17 @@ the apex and route it to the `nozil-dev` Worker. The adapter merges this into
 `dist/server/wrangler.json`, so it ships with the **workflow_dispatch** production
 `wrangler deploy` (PR/main `versions upload` does not touch routes).
 
+> **`routes` flips two defaults to `false`** — `wrangler.toml` pins them back:
+>
+> ```toml
+> preview_urls = true   # keep version *.workers.dev URLs (deploy.yml comments them on PRs)
+> workers_dev  = false  # apex is the sole production route — no duplicate-content URL
+> ```
+>
+> Without `preview_urls = true`, `wrangler versions upload` stops returning a `*.workers.dev`
+> URL and the PR preview comment silently goes blank. `workers_dev = false` is the desired
+> end state (the old `nozil-dev.*.workers.dev` production URL now 404s — expected).
+
 > **Token scope:** binding a route needs **Zone → Workers Routes → Edit** for the `nozil.dev`
 > zone, not just the account-level Workers scope on the default _Edit Cloudflare Workers_
 > token. If the production deploy errors on the route, add a Zone-scoped permission to
