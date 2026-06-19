@@ -109,39 +109,62 @@ import EmailReveal from '../components/EmailReveal.astro'
 </PageLayout>
 
 <script>
-  const form = document.getElementById('contact-form') as HTMLFormElement | null
-  const formWrap = document.getElementById('form-wrap')
-  const successWrap = document.getElementById('success-wrap')
-  const serverError = document.getElementById('server-error')
-  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement | null
+  type Status = 'idle' | 'submitting' | 'success' | 'error'
+  type State = { status: Status; errors: Record<string, string> }
 
-  form?.addEventListener('submit', async (e) => {
+  const els = {
+    form: document.getElementById('contact-form') as HTMLFormElement,
+    formWrap: document.getElementById('form-wrap') as HTMLElement,
+    successWrap: document.getElementById('success-wrap') as HTMLElement,
+    serverError: document.getElementById('server-error') as HTMLElement,
+    submitBtn: document.getElementById('submit-btn') as HTMLButtonElement,
+    errorName: document.getElementById('error-name') as HTMLElement,
+    errorEmail: document.getElementById('error-email') as HTMLElement,
+    errorMessage: document.getElementById('error-message') as HTMLElement,
+  }
+
+  function render(state: State) {
+    els.formWrap.hidden = state.status === 'success'
+    els.successWrap.hidden = state.status !== 'success'
+    els.serverError.hidden = state.status !== 'error'
+    els.submitBtn.disabled = state.status === 'submitting'
+    els.submitBtn.textContent = state.status === 'submitting' ? 'Sending…' : 'Send message'
+
+    const show = (el: HTMLElement, msg: string | undefined) => {
+      el.hidden = !msg
+      el.textContent = msg ?? ''
+    }
+    show(els.errorName, state.errors.name)
+    show(els.errorEmail, state.errors.email)
+    show(els.errorMessage, state.errors.message)
+  }
+
+  let state: State = { status: 'idle', errors: {} }
+  render(state)
+
+  els.form.addEventListener('submit', async (e) => {
     e.preventDefault()
-    clearErrors()
 
-    const fd = new FormData(form!)
-    const name = ((fd.get('name') as string | null) ?? '').trim()
-    const email = ((fd.get('email') as string | null) ?? '').trim()
-    const subject = ((fd.get('subject') as string | null) ?? '').trim()
-    const message = ((fd.get('message') as string | null) ?? '').trim()
-    const _honey = (fd.get('_honey') as string | null) ?? ''
+    const fd = new FormData(els.form)
+    const name = ((fd.get('name') as string) ?? '').trim()
+    const email = ((fd.get('email') as string) ?? '').trim()
+    const subject = ((fd.get('subject') as string) ?? '').trim()
+    const message = ((fd.get('message') as string) ?? '').trim()
+    const _honey = (fd.get('_honey') as string) ?? ''
 
-    let valid = true
-    if (!name) {
-      showError('name', 'Name is required')
-      valid = false
-    }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showError('email', 'A valid email is required')
-      valid = false
-    }
-    if (message.length < 20) {
-      showError('message', 'Message must be at least 20 characters')
-      valid = false
-    }
-    if (!valid) return
+    const errors: Record<string, string> = {}
+    if (!name) errors.name = 'Name is required'
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'A valid email is required'
+    if (message.length < 20) errors.message = 'Message must be at least 20 characters'
 
-    setSubmitting(true)
+    if (Object.keys(errors).length > 0) {
+      state = { status: 'idle', errors }
+      render(state)
+      return
+    }
+
+    state = { status: 'submitting', errors: {} }
+    render(state)
 
     try {
       const res = await fetch('/api/contact', {
@@ -151,48 +174,22 @@ import EmailReveal from '../components/EmailReveal.astro'
       })
 
       if (res.ok) {
-        setSubmitting(false)
-        if (formWrap) formWrap.hidden = true
-        if (successWrap) successWrap.hidden = false
+        state = { status: 'success', errors: {} }
+        render(state)
         return
       }
 
       type ErrorBody = { error?: string; issues?: Record<string, string[]> }
       const data = (await res.json()) as ErrorBody
-      if (data.issues) {
-        for (const [field, msgs] of Object.entries(data.issues)) {
-          showError(field, msgs[0] ?? 'Invalid value')
-        }
-      } else {
-        if (serverError) serverError.hidden = false
+      const fieldErrors: Record<string, string> = {}
+      for (const [field, msgs] of Object.entries(data.issues ?? {})) {
+        fieldErrors[field] = msgs[0] ?? 'Invalid value'
       }
+      state = { status: Object.keys(fieldErrors).length > 0 ? 'idle' : 'error', errors: fieldErrors }
     } catch {
-      if (serverError) serverError.hidden = false
+      state = { status: 'error', errors: {} }
     }
 
-    setSubmitting(false)
+    render(state)
   })
-
-  function setSubmitting(on: boolean) {
-    if (!submitBtn) return
-    submitBtn.disabled = on
-    submitBtn.textContent = on ? 'Sending…' : 'Send message'
-  }
-
-  function showError(field: string, msg: string) {
-    const el = document.getElementById(`error-${field}`)
-    if (el) {
-      el.textContent = msg
-      el.hidden = false
-    }
-  }
-
-  function clearErrors() {
-    if (serverError) serverError.hidden = true
-    // Scoped to the form so future page-level error-* IDs aren't affected
-    form?.querySelectorAll('[id^="error-"]').forEach((el) => {
-      ;(el as HTMLElement).hidden = true
-      el.textContent = ''
-    })
-  }
 </script>
