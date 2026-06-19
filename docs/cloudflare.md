@@ -100,14 +100,47 @@ Verify with `pnpm exec wrangler whoami`.
 
 ## Environment Variables
 
-| Variable         | Where                                       | Notes               |
-| ---------------- | ------------------------------------------- | ------------------- |
-| `RESEND_API_KEY` | CF Workers dashboard → Settings → Variables | Resend API key      |
-| `EMAIL_FROM`     | CF Workers dashboard → Settings → Variables | `contact@nozil.dev` |
-| `EMAIL_TO`       | CF Workers dashboard → Settings → Variables | Destination inbox   |
+| Variable          | Where                                       | When    | Notes                                                       |
+| ----------------- | ------------------------------------------- | ------- | ----------------------------------------------------------- |
+| `RESEND_API_KEY`  | CF Workers dashboard → Settings → Variables | runtime | Resend API key                                              |
+| `EMAIL_FROM`      | CF Workers dashboard → Settings → Variables | runtime | `contact@nozil.dev`                                         |
+| `EMAIL_TO`        | CF Workers dashboard → Settings → Variables | runtime | Destination inbox                                           |
+| `CF_BEACON_TOKEN` | GitHub Actions repo secret                  | build   | Cloudflare Web Analytics beacon token (see Analytics below) |
 
 Never commit secrets. Use `wrangler secret put <NAME>` or the CF dashboard. Local dev
 values go in `.dev.vars` (gitignored).
+
+**Runtime vs build-time.** `RESEND_*`/`EMAIL_*` are read by the Worker at request time
+(`import { env } from 'cloudflare:workers'` in `src/pages/api/contact.ts`). `CF_BEACON_TOKEN`
+is different: the pages it lands on are **prerendered**, so it must be present when
+`pnpm build` runs — it is read via `astro:env/client` in `BaseLayout.astro` and baked into the
+static HTML. That's why it's a GitHub Actions secret (wired into the `pnpm build` step of the
+deploy workflows — `pr-preview.yml`, `deploy-preview.yml`, `deploy-production.yml`), not a
+Worker dashboard variable. Local builds read it from `.env` (see `.env.example`); omit it and
+the build simply ships no beacon.
+
+## Analytics — Cloudflare Web Analytics
+
+Cookieless, privacy-first, no consent banner needed (no PII, no cross-site tracking) — a good
+fit for an EU site. Free and unlimited.
+
+**Manual beacon, not automatic.** Cloudflare's "Automatic setup" only injects the beacon on
+proxied origins / Pages, **not** on responses served by a Worker — so this Worker-hosted site
+gets nothing from automatic mode (verify: `curl -s https://nozil.dev/ | grep cloudflareinsights`
+returns nothing under automatic mode). The beacon is therefore added manually in
+`src/layouts/BaseLayout.astro`, gated on `CF_BEACON_TOKEN`.
+
+Setup:
+
+1. CF dashboard → Analytics → Web Analytics → add site `nozil.dev` → copy the **site token**.
+2. Set it as a GitHub Actions secret so deploy builds emit the beacon:
+   ```bash
+   gh secret set CF_BEACON_TOKEN   # paste the site token when prompted
+   ```
+3. (Optional, local) add it to `.env` to preview the beacon locally.
+
+The token is not a true secret — it ships in the public page source — but it's kept out of the
+repo (env var, not hard-coded) for hygiene and to match the `RESEND_API_KEY` pattern.
 
 ## Deployment (GitHub Actions)
 

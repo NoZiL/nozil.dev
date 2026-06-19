@@ -1,5 +1,5 @@
 import process from 'node:process'
-import { defineConfig, sessionDrivers } from 'astro/config'
+import { defineConfig, envField, sessionDrivers } from 'astro/config'
 import tailwindcss from '@tailwindcss/vite'
 import cloudflare from '@astrojs/cloudflare'
 import sitemap from '@astrojs/sitemap'
@@ -19,6 +19,17 @@ export default defineConfig({
   // binding, which `wrangler versions upload` tries to re-provision on every
   // CI run (and fails once the namespace exists).
   session: { driver: sessionDrivers.null() },
+  // Cloudflare Web Analytics beacon token. Read at *build* time — these pages
+  // are prerendered, so the Worker runtime env (used by RESEND_* in
+  // src/pages/api/contact.ts) isn't available here. context: 'client' /
+  // access: 'public' because the token ships in the beacon <script> anyway;
+  // optional so local/PR builds without the secret simply omit the beacon.
+  // See docs/cloudflare.md → Analytics.
+  env: {
+    schema: {
+      CF_BEACON_TOKEN: envField.string({ context: 'client', access: 'public', optional: true }),
+    },
+  },
   adapter: cloudflare({
     // Optimise images at build time with sharp instead of the runtime
     // Cloudflare Images binding (which requires workerd during prerender).

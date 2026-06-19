@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css'
+import { CF_BEACON_TOKEN } from 'astro:env/client'
 
 interface Props {
   title: string
@@ -50,5 +51,25 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined
   </head>
   <body class="min-h-screen font-sans antialiased">
     <slot />
+    {
+      /*
+      Cloudflare Web Analytics — cookieless, no PII, no consent banner needed.
+      Manual beacon: CF's "automatic setup" does not inject on Worker-served
+      responses, only on proxied origins/Pages. Token comes from the build-time
+      CF_BEACON_TOKEN env var (see astro.config.mjs); omitted when unset so
+      local/PR builds carry no beacon. is:inline keeps the data-cf-beacon
+      attribute verbatim instead of letting Astro process the script.
+    */
+    }
+    {
+      CF_BEACON_TOKEN && (
+        <script
+          is:inline
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({ token: CF_BEACON_TOKEN })}
+        />
+      )
+    }
   </body>
 </html>
