@@ -1,13 +1,14 @@
 name: CI
 
+# Reusable quality gate. Called by every deploy workflow (pr-preview,
+# deploy-preview, deploy-production) so nothing deploys on a red build.
+# Not triggered directly on `pull_request`/`push` — the callers own those
+# events, which keeps CI from running twice on the same ref.
 on:
-  pull_request:
-  push:
-    branches: [main]
+  workflow_call:
 
-# Cancel superseded runs on the same ref so we never sit behind stale work.
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
