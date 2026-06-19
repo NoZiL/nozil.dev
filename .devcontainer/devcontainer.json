@@ -16,17 +16,13 @@
     "source=nozil.dev-claude,target=/home/node/.claude,type=volume",
     "source=nozil.dev-gh,target=/home/node/.config/gh,type=volume",
     "source=nozil.dev-rtk,target=/home/node/.local/share/rtk,type=volume",
-    "source=nozil.dev-ctx7,target=/home/node/.config/context7,type=volume"
+    "source=nozil.dev-ctx7,target=/home/node/.config/context7,type=volume",
+    "source=nozil.dev-wrangler,target=/home/node/.config/.wrangler,type=volume",
+    "source=nozil.dev-zsh-history,target=/commandhistory,type=volume"
   ],
-  "runArgs": ["--env-file", "${localWorkspaceFolder}/.devcontainer/.env"],
   "containerEnv": {
     "CLAUDE_CONFIG_DIR": "/home/node/.claude"
   },
-  "remoteEnv": {
-    "CLOUDFLARE_ACCOUNT_ID": "${localEnv:CLOUDFLARE_ACCOUNT_ID}",
-    "CLOUDFLARE_API_TOKEN": "${localEnv:CLOUDFLARE_API_TOKEN}"
-  },
-  "initializeCommand": "[ -f ${localWorkspaceFolder}/.devcontainer/.env ] || cp ${localWorkspaceFolder}/.devcontainer/.env.example ${localWorkspaceFolder}/.devcontainer/.env",
   "onCreateCommand": "if [ -w /usr/local/bin ]; then corepack enable; else sudo corepack enable; fi",
   "postStartCommand": "pnpm install",
   "postCreateCommand": "bash .devcontainer/post-create.sh",
