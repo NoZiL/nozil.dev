@@ -41,7 +41,16 @@ export default defineConfig({
     platformProxy: { enabled: false },
   }),
   integrations: [
-    sitemap(),
+    // Stamp every sitemap entry with the build time as <lastmod>. @astrojs/sitemap
+    // omits lastmod by default; search engines use it to schedule recrawls, and
+    // the IndexNow deploy step (see deploy-production.yml) reads it to pick URLs
+    // to submit. Build time is a reasonable proxy: deploys are content-driven.
+    sitemap({
+      serialize(item) {
+        item.lastmod = new Date().toISOString()
+        return item
+      },
+    }),
     // CV PDF snapshot of /work. astro-pdf needs headless Chromium, which is
     // flaky to provision in CI, so it's OPT-IN: regenerate locally with
     // `pnpm cv:pdf` (sets GENERATE_PDF) and commit public/cv.pdf. Normal CI /
