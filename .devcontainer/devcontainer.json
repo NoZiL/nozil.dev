@@ -21,12 +21,13 @@
     "source=nozil.dev-zsh-history,target=/commandhistory,type=volume"
   ],
   "containerEnv": {
-    "CLAUDE_CONFIG_DIR": "/home/node/.claude"
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude",
+    "DISABLE_AUTOUPDATER": "1"
   },
   "onCreateCommand": "if [ -w /usr/local/bin ]; then corepack enable; else sudo corepack enable; fi",
   "postStartCommand": "pnpm install",
   "postCreateCommand": "bash .devcontainer/post-create.sh",
-  "forwardPorts": [4321, 8788],
+  "forwardPorts": [4321, 8788, 8976],
   "portsAttributes": {
     "4321": {
       "label": "Astro Dev Server",
@@ -34,6 +35,10 @@
     },
     "8788": {
       "label": "Wrangler Pages Dev (CF Functions)",
+      "onAutoForward": "silent"
+    },
+    "8976": {
+      "label": "Wrangler OAuth callback",
       "onAutoForward": "silent"
     }
   },
