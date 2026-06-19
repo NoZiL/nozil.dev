@@ -48,7 +48,7 @@ astro 6.4.2
 typescript 6.0.3
 zod 4.4.3                       # content schemas + form validation (note: v4 API)
 
-wrangler 4.95.0                 # CLI for CF Workers local dev + deploy (bumped to satisfy @cloudflare/vite-plugin peer)
+wrangler 4.102.0                # CLI for CF Workers local dev + deploy (matches @cloudflare/vite-plugin peer ^4.102.0)
 resend 6.12.4                   # transactional email — form → inbox, no storage layer
 ```
 
