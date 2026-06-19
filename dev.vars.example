@@ -1,0 +1,6 @@
+# Local development env vars for the CF Worker (copy to .dev.vars, which is gitignored).
+# Production values live in the CF Workers dashboard → Settings → Environment Variables.
+
+RESEND_API_KEY=re_your_api_key_here
+EMAIL_FROM=sender@yourdomain.com
+EMAIL_TO=your_inbox@example.com

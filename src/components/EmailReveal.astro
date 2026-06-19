@@ -1,21 +1,31 @@
-{
-  /* JS email reveal — the address never appears in static HTML (see
-    docs/contact-plan.md). Assembled from parts on click so plain-text
-    scrapers find nothing, even in the minified bundle. */
+---
+// JS email reveal — the address never appears in static HTML (see
+// docs/contact-plan.md). Assembled from parts on click so plain-text
+// scrapers find nothing, even in the minified bundle.
+
+interface Props {
+  // Unique suffix when multiple instances coexist on the same page.
+  // Omit for the default (footer) instance.
+  suffix?: string
 }
+const { suffix } = Astro.props
+const btnId = suffix ? `reveal-email-${suffix}` : 'reveal-email'
+const displayId = suffix ? `email-display-${suffix}` : 'email-display'
+---
+
 <button
   type="button"
-  id="reveal-email"
+  id={btnId}
   class="hover:text-accent dark:hover:text-accent-dark cursor-pointer underline decoration-dotted underline-offset-4"
 >
   Show email
 </button>
-<span id="email-display" aria-live="polite" tabindex="-1" class="font-mono"></span>
+<span id={displayId} aria-live="polite" tabindex="-1" class="font-mono"></span>
 
-<script>
-  document.getElementById('reveal-email')?.addEventListener('click', () => {
-    const display = document.getElementById('email-display')
-    const button = document.getElementById('reveal-email')
+<script define:vars={{ btnId, displayId }} is:inline>
+  document.getElementById(btnId)?.addEventListener('click', () => {
+    const display = document.getElementById(displayId)
+    const button = document.getElementById(btnId)
     if (!display || !button) return
     display.textContent = ['contact', 'nozil.dev'].join('@')
     // Move focus before hiding the button, or keyboard focus drops to <body>
