@@ -76,6 +76,28 @@ resolves to IPv6 `::1` only (some WSL2/devcontainer setups), the prerender fetch
 `ECONNREFUSED`. The `build` script sets `NODE_OPTIONS=--dns-result-order=ipv4first` to fix
 this; it is harmless on CI (Ubuntu resolves `localhost` to `127.0.0.1`).
 
+## Local authentication (devcontainer)
+
+`wrangler whoami` / `deploy` / `versions upload` from inside the devcontainer need an OAuth
+login. Run it once:
+
+```bash
+pnpm exec wrangler login --callback-host 0.0.0.0
+```
+
+`--callback-host 0.0.0.0` is required in the devcontainer: the OAuth callback server binds to
+all interfaces (not just `localhost`) so the host browser's redirect reaches it through the
+forwarded port. Port **8976** (the callback port) is in `devcontainer.json` → `forwardPorts`
+for this reason. Open the printed URL, approve, and the flow completes.
+
+The token is written to `/home/node/.config/.wrangler/config/default.toml`, which is the
+`nozil.dev-wrangler` named volume — so the login **persists across container rebuilds**.
+Verify with `pnpm exec wrangler whoami`.
+
+> wrangler resolves its config dir to `~/.config/.wrangler` (XDG) unless a legacy
+> `~/.wrangler` directory exists; the volume is mounted at the former. CI doesn't use this —
+> it authenticates with the `CLOUDFLARE_API_TOKEN` repo secret instead (see below).
+
 ## Environment Variables
 
 | Variable         | Where                                       | Notes               |
