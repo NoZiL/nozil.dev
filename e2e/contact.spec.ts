@@ -48,6 +48,49 @@ test('short message triggers validation error', async ({ page }) => {
   await expect(page.locator('#error-message')).toContainText('20 characters')
 })
 
+test('server-side field errors (422) render inline on their slots', async ({ page }) => {
+  await page.route('/api/contact', (route) =>
+    route.fulfill({
+      status: 422,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'Validation failed', issues: { email: ['A valid email is required'] } }),
+    })
+  )
+
+  await page.goto('/contact')
+
+  // Fill values that pass client validation so the request actually fires
+  await page.getByLabel('Name').fill('Test User')
+  await page.getByLabel('Email').fill('test@example.com')
+  await page.getByLabel('Message').fill('This is a test message that is long enough to pass validation.')
+  await page.getByRole('button', { name: 'Send message' }).click()
+
+  // Server-flagged field error appears inline; generic block stays hidden
+  await expect(page.locator('#error-email')).toBeVisible({ timeout: 5_000 })
+  await expect(page.locator('#error-email')).toContainText('valid email')
+  await expect(page.locator('#server-error')).toBeHidden()
+})
+
+test('server error for a field with no slot falls back to the generic block', async ({ page }) => {
+  await page.route('/api/contact', (route) =>
+    route.fulfill({
+      status: 422,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'Validation failed', issues: { _form: ['Unexpected error'] } }),
+    })
+  )
+
+  await page.goto('/contact')
+
+  await page.getByLabel('Name').fill('Test User')
+  await page.getByLabel('Email').fill('test@example.com')
+  await page.getByLabel('Message').fill('This is a test message that is long enough to pass validation.')
+  await page.getByRole('button', { name: 'Send message' }).click()
+
+  // No slot for _form → must not be silently swallowed; generic block shows
+  await expect(page.locator('#server-error')).toBeVisible({ timeout: 5_000 })
+})
+
 test('server error state shown when API returns 500 (mocked)', async ({ page }) => {
   await page.route('/api/contact', (route) =>
     route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'Server error' }) })
