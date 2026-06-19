@@ -62,14 +62,15 @@ By the time you review, the tests already passed — you're reviewing correctnes
 
 ### Test scope per PR
 
-| PR               | Tests                                                               |
-| ---------------- | ------------------------------------------------------------------- |
-| `feat/scaffold`  | Loads home page, no console errors, correct `<title>`               |
-| `feat/home`      | Hero text visible, nav links present, dark mode toggle works        |
-| `feat/work`      | CV page renders roles, download button present                      |
-| `feat/portfolio` | Grid renders, filter chips work, detail page loads                  |
-| `feat/contact`   | Form submits (mock Resend), success state shown, email reveal works |
-| `feat/i18n`      | `/fr/` loads, lang toggle switches locale, hreflang tags present    |
+| PR               | Tests                                                                                            |
+| ---------------- | ------------------------------------------------------------------------------------------------ |
+| `feat/scaffold`  | Loads home page, no console errors, correct `<title>`                                            |
+| `feat/home`      | Hero text visible, nav links present, dark mode toggle works                                     |
+| `feat/work`      | CV page renders roles, download button present                                                   |
+| `feat/portfolio` | Grid renders, filter chips work, detail page loads                                               |
+| `feat/contact`   | Form submits (mock Resend), success state shown, email reveal works                              |
+| `feat/i18n`      | `/fr/` loads, lang toggle switches locale, hreflang tags present                                 |
+| `feat/seo`       | `robots.txt`/`llms.txt`/`llms-full.txt` served, JSON-LD + canonical present, Lighthouse SEO ≥ 95 |
 
 ### Config
 
@@ -79,6 +80,15 @@ See [`playwright.config.ts`](../playwright.config.ts). Key points:
   the actual built Worker, not `astro dev`. Locally it builds first; CI builds explicitly.
 - Two projects: desktop Chrome + a Chromium-based mobile device, so CI only needs the
   chromium browser binary.
+
+#### Lighthouse SEO gate
+
+`e2e/lighthouse.spec.ts` enforces the issue #8 Lighthouse SEO ≥ 95 bar inside the existing
+Playwright run (no separate CI job). It uses [`playwright-lighthouse`](https://github.com/abhinaba-ghosh/playwright-lighthouse):
+a worker-scoped fixture launches Chromium with `--remote-debugging-port`, Lighthouse connects
+over CDP and audits the `seo` category only (device-independent, so it runs once on the
+`chromium` project and is skipped on `mobile`). Reuses the same `chromium` binary CI already
+installs — no extra system Chrome.
 
 Tests run against `pnpm build` + `pnpm preview` — the actual Cloudflare Workers output.
 

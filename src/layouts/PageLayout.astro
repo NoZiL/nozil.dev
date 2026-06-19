@@ -2,17 +2,46 @@
 import BaseLayout from './BaseLayout.astro'
 import ThemeToggle from '../components/ThemeToggle.astro'
 import EmailReveal from '../components/EmailReveal.astro'
+import JsonLd from '../components/JsonLd.astro'
+
+interface Crumb {
+  name: string
+  url: string
+}
 
 interface Props {
   title: string
   description?: string
   ogImage?: string
+  // Override the breadcrumb trail (e.g. a project's real title on a detail
+  // page). Defaults to one derived from the URL path segments.
+  breadcrumbs?: Crumb[]
 }
 
-const { title, description, ogImage } = Astro.props
+const { title, description, ogImage, breadcrumbs } = Astro.props
+
+// BreadcrumbList JSON-LD on every page (issue #8). Derive a trail from the path
+// when none is passed: "/portfolio/foo" → Home › Portfolio › Foo.
+const segments = Astro.url.pathname.split('/').filter(Boolean)
+const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+const trail: Crumb[] = breadcrumbs ?? [
+  { name: 'Home', url: '/' },
+  ...segments.map((seg, i) => ({ name: titleCase(seg), url: `/${segments.slice(0, i + 1).join('/')}` })),
+]
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: trail.map((crumb, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: crumb.name,
+    item: new URL(crumb.url, Astro.site).href,
+  })),
+}
 ---
 
 <BaseLayout title={title} description={description} ogImage={ogImage}>
+  <JsonLd schema={breadcrumbSchema} />
   <div class="mx-auto flex min-h-screen max-w-3xl flex-col px-6">
     <header class="flex items-center justify-between py-6" data-print-hide>
       <a href="/" class="font-mono text-sm font-medium text-zinc-900 dark:text-violet-100">nozil.dev</a>

@@ -39,9 +39,17 @@ const dateRange = `${fmt(startDate)} — ${endDate ? fmt(endDate) : 'Ongoing'}`
 
 const categoryLabel: Record<string, string> = { mobile: 'Mobile', web: 'Web', oss: 'OSS' }
 const typeLabel: Record<string, string> = { work: 'Work', oss: 'OSS', personal: 'Personal' }
+
+// Explicit breadcrumb trail so the last crumb uses the project's real title
+// rather than the title-cased slug (issue #8 — BreadcrumbList on all pages).
+const breadcrumbs = [
+  { name: 'Home', url: '/' },
+  { name: 'Portfolio', url: '/portfolio' },
+  { name: title, url: `/portfolio/${project.id}` },
+]
 ---
 
-<PageLayout title={`${title} — Nicolas Zilli`} description={tagline} ogImage={image}>
+<PageLayout title={`${title} — Nicolas Zilli`} description={tagline} ogImage={image} breadcrumbs={breadcrumbs}>
   <a
     href="/portfolio"
     class="hover:text-accent dark:hover:text-accent-dark font-mono text-xs text-zinc-400 dark:text-violet-500"

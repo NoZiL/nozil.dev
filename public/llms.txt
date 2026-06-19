@@ -1,0 +1,35 @@
+# Nicolas Zilli
+
+> Lead Mobile Engineer and freelance software developer based in Lyon, France. Specialises in React Native and Expo, with 10 years of React experience. Builds and ships mobile and web products for founders and small teams through nozil.dev.
+
+Nicolas Zilli leads mobile engineering at Tennaxia, building field-first health, safety and environmental (HSE) compliance tools used by teams on the ground. Through nozil.dev he works with founders and small teams — often as the sole developer or technical lead, working directly alongside CEOs and entrepreneurs — to turn ideas into shipped products. He brings 10 years of React experience and 5 years of mobile-focused work, and is leaning into AI-assisted development (Claude in particular) to help solo mobile developers punch above their weight.
+
+## Skills
+
+- Mobile: React Native (5 years), Expo (managed + bare workflow), EAS Build / EAS Submit
+- Frontend: React (10 years), TypeScript, Tailwind CSS, Astro, Next.js
+- Backend / API: Node.js, GraphQL, REST, Elixir / Phoenix, Go, PostgreSQL, SQLite
+- DevOps & Tooling: Turborepo, pnpm workspaces, GitHub Actions, Docker, Kubernetes, Cloudflare Workers
+- AI / Productivity: Claude (Anthropic), Claude Code
+
+## Pages
+
+- [Work & CV](https://nozil.dev/work): Experience timeline, skills taxonomy, and CV download
+- [Portfolio](https://nozil.dev/portfolio): Selected mobile, web, and open-source projects
+- [Contact](https://nozil.dev/contact): Contact form and direct email
+
+## Status
+
+- Open to freelance engagements (mobile-first, product work)
+- Not actively looking for full-time roles
+- Based in Lyon, France — remote-friendly
+
+## Contact
+
+- GitHub: https://github.com/nozil
+- LinkedIn: https://www.linkedin.com/in/nicolaszilli
+- Contact form: https://nozil.dev/contact
+
+## Optional
+
+- [llms-full.txt](https://nozil.dev/llms-full.txt): Full CV and portfolio data in plain text
