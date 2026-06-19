@@ -162,9 +162,46 @@ subdomain** enabled on the account (CF dashboard → Workers & Pages → Subdoma
 
 ## Domain / DNS
 
-- nozil.dev A/CNAME record managed in CF DNS dashboard
-- Proxied (orange cloud) — CF handles SSL automatically
-- www redirect: set up a CF redirect rule www → apex
+**Apex (`nozil.dev`) is canonical; `www` 301-redirects to it.** The apex matches
+`site: 'https://nozil.dev'` in `astro.config.mjs`, so canonical tags, sitemap, `hreflang`,
+and OG URLs already point there — no rebuild needed. The Cloudflare-managed zone flattens the
+apex internally, so a Worker custom domain on the bare apex works natively (the legacy
+"can't CNAME an apex" limitation doesn't apply).
+
+### Custom domain — config-as-code
+
+The apex is bound to the Worker via `routes` in the root `wrangler.toml`:
+
+```toml
+routes = [{ pattern = "nozil.dev", custom_domain = true }]
+```
+
+`custom_domain = true` makes Cloudflare create/manage the proxied DNS record and TLS cert for
+the apex and route it to the `nozil-dev` Worker. The adapter merges this into
+`dist/server/wrangler.json`, so it ships with the **workflow_dispatch** production
+`wrangler deploy` (PR/main `versions upload` does not touch routes).
+
+> **Token scope:** binding a route needs **Zone → Workers Routes → Edit** for the `nozil.dev`
+> zone, not just the account-level Workers scope on the default _Edit Cloudflare Workers_
+> token. If the production deploy errors on the route, add a Zone-scoped permission to
+> `CLOUDFLARE_API_TOKEN` (or add the domain once via the dashboard: Workers & Pages →
+> `nozil-dev` → Settings → Domains & Routes).
+
+### www → apex redirect (dashboard, no code)
+
+Handled at the edge with a **Single Redirect Rule** — no Worker invocation:
+
+- CF dashboard → `nozil.dev` zone → **Rules → Redirect Rules → Create**
+- **When**: Hostname **equals** `www.nozil.dev`
+- **Then**: Dynamic redirect → Expression `concat("https://nozil.dev", http.request.uri.path)`
+- **Status**: `301`, **Preserve query string**: on
+- Requires a DNS record for `www` (proxied) so CF terminates TLS before redirecting — an
+  `AAAA www → 100::` (or `CNAME www → nozil.dev`) proxied record is the usual placeholder.
+
+### Acceptance (issue #10)
+
+- `https://nozil.dev` serves the Worker (HTTP 200), valid TLS
+- `https://www.nozil.dev/*` 301s to `https://nozil.dev/*`
 
 ## Rollback
 
