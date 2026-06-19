@@ -1,0 +1,47 @@
+name: Deploy Preview
+
+# Fixed staging environment. Every push to main runs CI, then deploys the
+# standalone `nozil-dev-preview` Worker (routes stripped, workers_dev on) to a
+# stable *.workers.dev URL, recorded as the `preview` GitHub environment.
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-preview
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Deploy fixed preview Worker
+        id: deploy
+        run: |
+          set -o pipefail
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID not set — skipping preview deploy. Add repo secrets to enable."
+            exit 0
+          fi
+          cfg=$(node scripts/cf-config.mjs --preview)
+          out=$(pnpm exec wrangler deploy -c "$cfg" 2>&1 | tee /dev/stderr)
+          url=$(printf '%s\n' "$out" | grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' | head -1)
+          echo "url=$url" >> "$GITHUB_OUTPUT"

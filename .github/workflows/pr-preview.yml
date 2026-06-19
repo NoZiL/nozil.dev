@@ -1,0 +1,48 @@
+name: PR Preview
+
+# Ephemeral per-PR preview. CI must pass first; then we upload a Worker
+# *version* (no routes touched, no production traffic shifted) and record it
+# as a GitHub Deployment to a per-PR environment so it shows on the PR — no
+# comment. The environment is torn down by pr-preview-cleanup.yml on close.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: pr-preview-${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  preview:
+    needs: ci
+    runs-on: ubuntu-latest
+    environment:
+      name: pr-${{ github.event.number }}
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Upload ephemeral preview version
+        id: deploy
+        run: |
+          set -o pipefail
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID not set — skipping preview deploy. Add repo secrets to enable."
+            exit 0
+          fi
+          cfg=$(node scripts/cf-config.mjs)
+          out=$(pnpm exec wrangler versions upload -c "$cfg" 2>&1 | tee /dev/stderr)
+          url=$(printf '%s\n' "$out" | grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' | head -1)
+          echo "url=$url" >> "$GITHUB_OUTPUT"

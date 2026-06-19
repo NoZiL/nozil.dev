@@ -67,20 +67,27 @@ Tests run against `pnpm build` + `pnpm preview` — the actual Cloudflare Worker
 
 ## CI/CD
 
-### Deployment — Cloudflare Workers via GitHub Actions
+The pipeline is one reusable CI workflow plus three single-purpose deploy workflows. Each
+deploy calls CI as a gate, so nothing ships on a red build; and because every event triggers
+a _different_ workflow file, no job ever renders as "skipped" (full Cloudflare/wrangler
+details in [docs/cloudflare.md](./cloudflare.md)):
 
-Deploys run from [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) using
-`wrangler` directly (the original CF Pages-native plan was dropped when the site moved to
-Workers — full details in [docs/cloudflare.md](./cloudflare.md)):
+| Workflow                                                                        | Trigger                                | Result                                                                                  |
+| ------------------------------------------------------------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------- |
+| [`ci.yml`](../.github/workflows/ci.yml)                                         | `workflow_call`                        | Reusable `quality` + `e2e` gate. Called by all three deploys (and so runs on every PR). |
+| [`pr-preview.yml`](../.github/workflows/pr-preview.yml)                         | PR opened/synchronize/reopened         | CI → `wrangler versions upload` → **ephemeral** `pr-<n>` GitHub environment (no comment) |
+| [`pr-preview-cleanup.yml`](../.github/workflows/pr-preview-cleanup.yml)         | PR closed                              | Deactivates + deletes the `pr-<n>` deployments (kills the ephemeral preview)             |
+| [`deploy-preview.yml`](../.github/workflows/deploy-preview.yml)                 | push to `main`                         | CI → deploy the **fixed** `nozil-dev-preview` Worker → `preview` GitHub environment      |
+| [`deploy-production.yml`](../.github/workflows/deploy-production.yml)           | `workflow_dispatch` (manual)           | CI → `wrangler deploy` → `production` GitHub environment (reviewer-gated)                |
 
-- Pull request / push to `main` → `wrangler versions upload` — staged preview version with a
-  `*.workers.dev` URL, commented on the PR. Production traffic never shifts automatically.
-- Manual workflow_dispatch → `wrangler deploy` — promotes a fresh build to production
-  (gated by the `production` GitHub Environment).
+Promotion chain: **CI passes → preview deployed → production promoted manually.** PR previews
+and the main `preview` env appear in the repo's **Environments** tab and on the PR itself
+(via GitHub Deployments) — no PR comment.
 
-### GitHub Actions — quality gate
+### CI gate — `ci.yml`
 
-See [`.github/workflows/ci.yml`](../.github/workflows/ci.yml):
+`ci.yml` is `workflow_call`-only (not triggered directly on `pull_request`/`push`) so it runs
+exactly once per ref, invoked by whichever deploy workflow owns the event:
 
 - **quality** job: `pnpm lint` → `format:check` → `typecheck` → `build`
 - **e2e** job (needs quality — no point running Playwright if the build is broken):
@@ -88,10 +95,21 @@ See [`.github/workflows/ci.yml`](../.github/workflows/ci.yml):
   already ships the system libs, so no slow `--with-deps` apt step), then `pnpm build` +
   `pnpm e2e`. On failure, the Playwright HTML report is uploaded as an artifact.
 
+### GitHub Environments
+
+Create these in repo Settings → Environments:
+
+- **`production`** — add **required reviewers** for the manual-deploy approval gate.
+- **`preview`** — the fixed staging Worker (`nozil-dev-preview.*.workers.dev`).
+- **`pr-*`** — auto-created per PR, auto-removed on close by `pr-preview-cleanup.yml`. (Full
+  environment deletion needs admin rights the default `GITHUB_TOKEN` may lack; the cleanup
+  always clears the deployments, and best-effort deletes the environment.)
+
 ### Branch protection on `main`
 
 Set in GitHub repo Settings → Branches:
 
-- Require status checks: `quality` + `e2e`
+- Require status checks: `ci / quality` + `ci / e2e` (the reusable jobs, namespaced under the
+  calling `ci` job)
 - Require PR before merging
 - No direct pushes to `main`
