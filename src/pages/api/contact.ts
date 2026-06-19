@@ -52,10 +52,10 @@ export const POST: APIRoute = async ({ request }) => {
 
   const resend = new Resend(RESEND_API_KEY)
   const { error: sendError } = await resend.emails.send({
-    from: `nozil.dev <${EMAIL_FROM}>`,
+    from: `nozil.dev <${EMAIL_FROM.trim()}>`,
     to: EMAIL_TO,
     replyTo: email,
-    subject: `[nozil.dev] ${subject || 'New message'}`,
+    subject: `[nozil.dev] ${subject?.replace(/[\r\n]/g, '') || 'New message'}`,
     text: `Name: ${name}\nEmail: ${email}\n\n${message}`,
   })
 

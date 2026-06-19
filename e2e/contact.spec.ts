@@ -31,8 +31,9 @@ test('client-side validation shows field errors on empty submit', async ({ page 
   await expect(page.locator('#error-name')).toBeVisible()
   await expect(page.locator('#error-email')).toBeVisible()
   await expect(page.locator('#error-message')).toBeVisible()
-  // Form stays visible
+  // Form stays visible; submit button re-enabled (no network request was made)
   await expect(page.locator('#form-wrap')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Send message' })).toBeEnabled()
 })
 
 test('short message triggers validation error', async ({ page }) => {
@@ -47,7 +48,11 @@ test('short message triggers validation error', async ({ page }) => {
   await expect(page.locator('#error-message')).toContainText('20 characters')
 })
 
-test('server error state shown when API is unconfigured (no env vars)', async ({ page }) => {
+test('server error state shown when API returns 500 (mocked)', async ({ page }) => {
+  await page.route('/api/contact', (route) =>
+    route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'Server error' }) })
+  )
+
   await page.goto('/contact')
 
   await page.getByLabel('Name').fill('Test User')
@@ -55,14 +60,14 @@ test('server error state shown when API is unconfigured (no env vars)', async ({
   await page.getByLabel('Message').fill('This is a test message that is long enough to pass validation.')
   await page.getByRole('button', { name: 'Send message' }).click()
 
-  // RESEND_API_KEY is not set in the test environment — expect server error state
-  await expect(page.locator('#server-error')).toBeVisible({ timeout: 10_000 })
+  await expect(page.locator('#server-error')).toBeVisible({ timeout: 5_000 })
+  // Submit button re-enabled so the user can retry
+  await expect(page.getByRole('button', { name: 'Send message' })).toBeEnabled()
   // Reveal fallback email button is shown inside the error area
   await expect(page.locator('#server-error').getByRole('button', { name: 'Show email' })).toBeVisible()
 })
 
 test('success state shown when API returns 200 (mocked)', async ({ page }) => {
-  // Intercept the POST and return a mocked success response
   await page.route('/api/contact', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) })
   )
@@ -77,6 +82,36 @@ test('success state shown when API returns 200 (mocked)', async ({ page }) => {
   await expect(page.locator('#success-wrap')).toBeVisible({ timeout: 5_000 })
   await expect(page.locator('#success-wrap')).toContainText('Message sent')
   await expect(page.locator('#form-wrap')).toBeHidden()
+})
+
+test('re-submit after server error clears error state and can succeed', async ({ page }) => {
+  let callCount = 0
+  await page.route('/api/contact', (route) => {
+    callCount++
+    if (callCount === 1) {
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'Server error' }) })
+    } else {
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) })
+    }
+  })
+
+  await page.goto('/contact')
+
+  const fillForm = async () => {
+    await page.getByLabel('Name').fill('Test User')
+    await page.getByLabel('Email').fill('test@example.com')
+    await page.getByLabel('Message').fill('This is a test message that is long enough to pass validation.')
+  }
+
+  // First submit → error
+  await fillForm()
+  await page.getByRole('button', { name: 'Send message' }).click()
+  await expect(page.locator('#server-error')).toBeVisible({ timeout: 5_000 })
+
+  // Second submit → success; error area must be cleared
+  await page.getByRole('button', { name: 'Send message' }).click()
+  await expect(page.locator('#server-error')).toBeHidden()
+  await expect(page.locator('#success-wrap')).toBeVisible({ timeout: 5_000 })
 })
 
 test('email reveal in error area assembles address on click', async ({ page }) => {

@@ -2,5 +2,5 @@
 # Production values live in the CF Workers dashboard → Settings → Environment Variables.
 
 RESEND_API_KEY=re_your_api_key_here
-EMAIL_FROM=contact@nozil.dev
+EMAIL_FROM=sender@yourdomain.com
 EMAIL_TO=your_inbox@example.com

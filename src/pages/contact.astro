@@ -75,18 +75,6 @@ import EmailReveal from '../components/EmailReveal.astro'
         <input type="text" name="_honey" tabindex="-1" autocomplete="off" />
       </div>
 
-      <div
-        id="server-error"
-        hidden
-        role="alert"
-        class="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950"
-      >
-        <p class="text-sm text-red-700 dark:text-red-300">Something went wrong. Try again or reach me directly:</p>
-        <div class="mt-2 text-sm">
-          <EmailReveal suffix="contact" />
-        </div>
-      </div>
-
       <button
         type="submit"
         id="submit-btn"
@@ -95,6 +83,19 @@ import EmailReveal from '../components/EmailReveal.astro'
         Send message
       </button>
     </form>
+
+    {/* Outside the form so it doesn't participate in form submission */}
+    <div
+      id="server-error"
+      hidden
+      role="alert"
+      class="mt-5 max-w-lg rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950"
+    >
+      <p class="text-sm text-red-700 dark:text-red-300">Something went wrong. Try again or reach me directly:</p>
+      <div class="mt-2 text-sm">
+        <EmailReveal suffix="contact" />
+      </div>
+    </div>
   </div>
 
   <div id="success-wrap" hidden>
@@ -150,6 +151,7 @@ import EmailReveal from '../components/EmailReveal.astro'
       })
 
       if (res.ok) {
+        setSubmitting(false)
         if (formWrap) formWrap.hidden = true
         if (successWrap) successWrap.hidden = false
         return
@@ -187,7 +189,8 @@ import EmailReveal from '../components/EmailReveal.astro'
 
   function clearErrors() {
     if (serverError) serverError.hidden = true
-    document.querySelectorAll('[id^="error-"]').forEach((el) => {
+    // Scoped to the form so future page-level error-* IDs aren't affected
+    form?.querySelectorAll('[id^="error-"]').forEach((el) => {
       ;(el as HTMLElement).hidden = true
       el.textContent = ''
     })
