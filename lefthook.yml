@@ -1,0 +1,19 @@
+# Git hooks managed by Lefthook — https://lefthook.dev
+#
+# Wired up automatically: `lefthook install` runs as lefthook's postinstall
+# after every `pnpm install` (allow-listed in pnpm-workspace.yaml), so both the
+# human and any machine working in this repo get the hooks with no extra step.
+#
+# Purpose: format staged files with Prettier *before* the commit is created, so
+# a commit can never reach CI and fail `pnpm format:check` on formatting alone.
+# `stage_fixed` re-adds whatever Prettier rewrites, so the rewrite is part of
+# the same commit (not left as an unstaged diff).
+pre-commit:
+  parallel: true
+  jobs:
+    - name: prettier
+      # Matches the file types Prettier owns here; pnpm-lock.yaml and other
+      # paths in .prettierignore are skipped by Prettier even when staged.
+      glob: '*.{astro,ts,tsx,js,mjs,cjs,json,jsonc,css,md,yml,yaml}'
+      run: pnpm exec prettier --write --ignore-unknown {staged_files}
+      stage_fixed: true
