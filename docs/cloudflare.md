@@ -62,7 +62,7 @@ The generated config's location depends on the build:
 
 `scripts/cf-config.mjs` resolves the right path (and, for the static-only case, emits a
 relocated `dist/wrangler.json` so the config sits outside the watched assets dir). The
-preview/deploy scripts and `deploy.yml` all call it:
+preview/deploy scripts and the deploy workflows all call it:
 
 ```bash
 pnpm deploy    # wrangler deploy -c "$(node scripts/cf-config.mjs)"
@@ -114,11 +114,11 @@ values go in `.dev.vars` (gitignored).
 Deploys run from three single-purpose workflows, each gated by the reusable `ci.yml`
 (pipeline overview in [docs/quality-ci.md](./quality-ci.md)):
 
-| Workflow                 | Trigger                    | wrangler                                       | Result                                         |
-| ------------------------ | -------------------------- | ---------------------------------------------- | ---------------------------------------------- |
-| `pr-preview.yml`         | Pull request (open/update) | `versions upload`                              | Ephemeral `pr-<n>` env (GitHub Deployment)     |
-| `deploy-preview.yml`     | Push to `main`             | `deploy -c $(cf-config.mjs --preview)`         | Fixed `nozil-dev-preview` Worker, `preview` env |
-| `deploy-production.yml`  | Manual (Actions → Run)     | `deploy -c $(cf-config.mjs)`                   | Promotes to production (`nozil.dev`)           |
+| Workflow                | Trigger                    | wrangler                               | Result                                          |
+| ----------------------- | -------------------------- | -------------------------------------- | ----------------------------------------------- |
+| `pr-preview.yml`        | Pull request (open/update) | `versions upload`                      | Ephemeral `pr-<n>` env (GitHub Deployment)      |
+| `deploy-preview.yml`    | Push to `main`             | `deploy -c $(cf-config.mjs --preview)` | Fixed `nozil-dev-preview` Worker, `preview` env |
+| `deploy-production.yml` | Manual (Actions → Run)     | `deploy -c $(cf-config.mjs)`           | Promotes to production (`nozil.dev`)            |
 
 `versions upload` stages a new Worker version **without** shifting production traffic and
 returns an ephemeral `*.workers.dev` preview URL — surfaced as a per-PR GitHub Deployment, not
