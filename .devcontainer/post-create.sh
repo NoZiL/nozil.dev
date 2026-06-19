@@ -2,8 +2,16 @@
 set -euo pipefail
 
 # Named volumes (and their Docker-created parent dirs) mount root-owned; fix all before creating as node.
-sudo chown -R node:node /home/node/.claude /home/node/.config /home/node/.local
+sudo chown -R node:node /home/node/.claude /home/node/.config /home/node/.local /commandhistory
 mkdir -p "$HOME/.local/state" "$HOME/.local/bin"
+
+# Persist zsh history on the nozil.dev-zsh-history volume (survives rebuilds).
+cat >> "$HOME/.zshrc" <<'ZRC'
+export HISTFILE=/commandhistory/.zsh_history
+export HISTSIZE=10000
+export SAVEHIST=10000
+setopt share_history inc_append_history
+ZRC
 
 # Install RTK
 curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh

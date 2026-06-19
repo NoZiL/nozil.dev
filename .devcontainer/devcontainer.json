@@ -17,7 +17,8 @@
     "source=nozil.dev-gh,target=/home/node/.config/gh,type=volume",
     "source=nozil.dev-rtk,target=/home/node/.local/share/rtk,type=volume",
     "source=nozil.dev-ctx7,target=/home/node/.config/context7,type=volume",
-    "source=nozil.dev-wrangler,target=/home/node/.config/.wrangler,type=volume"
+    "source=nozil.dev-wrangler,target=/home/node/.config/.wrangler,type=volume",
+    "source=nozil.dev-zsh-history,target=/commandhistory,type=volume"
   ],
   "containerEnv": {
     "CLAUDE_CONFIG_DIR": "/home/node/.claude"
