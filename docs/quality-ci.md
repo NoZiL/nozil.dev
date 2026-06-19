@@ -7,6 +7,7 @@
 | Type checking | `astro check` + `tsc --noEmit` | `astro check` covers `.astro` files; `tsc` covers the rest   |
 | Linting       | ESLint 10 (flat config)        | `eslint.config.js` — no `.eslintrc`                          |
 | Formatting    | Prettier                       | `prettier-plugin-astro` for `.astro` files                   |
+| Git hooks     | Lefthook                       | `lefthook.yml` — pre-commit auto-formats staged files        |
 | Unit tests    | Vitest                         | Pure logic: form validation, i18n helpers, email obfuscation |
 | E2E tests     | Playwright                     | Full page tests against production build                     |
 
@@ -30,6 +31,24 @@ print width 120, `prettier-plugin-astro` for `.astro` files.
 See [`package.json`](../package.json) (summarised in [CLAUDE.md](../CLAUDE.md) → Commands).
 Notable: `preview`/`deploy` run `wrangler` against the build-time-generated config resolved
 by `scripts/cf-config.mjs` — see [docs/cloudflare.md](./cloudflare.md).
+
+### Local enforcement — Lefthook pre-commit
+
+CI's `pnpm format:check` step had repeatedly failed on formatting alone. [Lefthook](https://lefthook.dev)
+([`lefthook.yml`](../lefthook.yml)) closes that gap by formatting **before** the commit exists,
+for both the human and any agent committing here:
+
+- **pre-commit** runs `prettier --write --ignore-unknown` on staged files matching the config
+  glob, then `stage_fixed: true` re-stages whatever Prettier rewrote — so the formatted result
+  is part of the same commit, not an unstaged diff left behind.
+- **Zero-setup install**: `lefthook` is allow-listed in `pnpm-workspace.yaml`, so its postinstall
+  runs `lefthook install` after every `pnpm install` — the hook is wired up on clone with no
+  manual step. (Re-run `pnpm exec lefthook install` if the hook ever goes missing.)
+- **Escape hatches**: `LEFTHOOK=0 git commit …` skips all hooks; `git commit --no-verify` is the
+  standard git bypass.
+
+This is a local guard, not a replacement for the CI gate — CI still runs `format:check` so a
+bypassed or hook-less commit is still caught.
 
 ---
 

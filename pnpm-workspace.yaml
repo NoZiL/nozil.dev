@@ -5,6 +5,8 @@
 # hygiene).
 allowBuilds:
   esbuild: true
+  # lefthook: postinstall runs `lefthook install` to wire up the git hooks.
+  lefthook: true
   puppeteer: true
   sharp: true
   workerd: true
