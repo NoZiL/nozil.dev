@@ -99,6 +99,7 @@ Every page's nav and footer must link to:
 - `docs/bio.md` — bio copy, skills taxonomy, GitHub README sync strategy
 - `docs/cv-plan.md` — /work reference: CV source-of-truth files + how the page is built
 - `docs/portfolio-plan.md` — project collection schema, showcase UX
+- `docs/discoverability.md` — search/LLM indexing: IndexNow, sitemap lastmod, Search Console, Brave/Leo
 
 <!-- rtk-instructions v2 -->
 

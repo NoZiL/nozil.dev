@@ -36,7 +36,13 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm exec wrangler deploy -c "$(node scripts/cf-config.mjs)"
+      # @astrojs/sitemap emits no <lastmod>, so the action's default
+      # lastmod-required filter dropped every URL ("No candidate urls need to
+      # submit"). Disable that filter to submit all sitemap URLs; api.indexnow.org
+      # fans out to every IndexNow participant (Bing, Yandex, Seznam, Naver).
       - uses: bojieyang/indexnow-action@v3
         with:
           sitemap-location: 'https://nozil.dev/sitemap-0.xml'
           key: 'e16dc979212c4ded832d4d0805716198'
+          endpoint: 'api.indexnow.org'
+          lastmod-required: 'false'
