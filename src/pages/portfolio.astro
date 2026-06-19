@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content'
 import PageLayout from '../layouts/PageLayout.astro'
 import ProjectCard from '../components/ProjectCard.astro'
 import FilterChip from '../components/FilterChip.astro'
+import JsonLd from '../components/JsonLd.astro'
 
 // Featured first, then most recent (ongoing roles — no endDate — float up),
 // then by start date. `order` breaks ties among featured.
@@ -21,12 +22,27 @@ const filters = [
   { id: 'web', label: 'Web' },
   { id: 'oss', label: 'OSS' },
 ] as const
+
+// JSON-LD ItemList schema (issue #8) — orders the portfolio entries so search
+// engines and LLMs see the curated list and can crawl each detail page.
+const itemListSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Portfolio — Nicolas Zilli',
+  itemListElement: projects.map((project, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: project.data.title,
+    url: new URL(`/portfolio/${project.id}`, Astro.site).href,
+  })),
+}
 ---
 
 <PageLayout
   title="Portfolio — Nicolas Zilli"
   description="Selected projects by Nicolas Zilli — mobile apps, web platforms, and open-source work."
 >
+  <JsonLd schema={itemListSchema} />
   <section>
     <h1 class="text-3xl font-semibold tracking-tight text-zinc-900 md:text-4xl dark:text-violet-100">Portfolio</h1>
     <p class="mt-4 max-w-prose text-lg">

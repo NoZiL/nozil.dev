@@ -1,0 +1,18 @@
+# robots.txt for nozil.dev
+# Everything is public and meant to be found — including by AI/LLM agents.
+# Machine-readable summary: /llms.txt and /llms-full.txt
+
+User-agent: *
+Allow: /
+
+# AI / LLM crawlers — explicitly welcomed
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://nozil.dev/sitemap-index.xml

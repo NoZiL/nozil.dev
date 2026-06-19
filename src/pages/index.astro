@@ -5,6 +5,7 @@ import ProjectCard from '../components/ProjectCard.astro'
 import ButtonLink from '../components/ButtonLink.astro'
 import SectionHeading from '../components/SectionHeading.astro'
 import Chip from '../components/Chip.astro'
+import JsonLd from '../components/JsonLd.astro'
 // Vendored GitHub avatar (u/3874258 at s=192, converted to webp via sharp),
 // served as a plain <img>: the compile image service can't transform images in
 // this build — it writes to outDir while the CF adapter emits to dist/client.
@@ -19,9 +20,28 @@ const featured = (await getCollection('projects'))
 
 // Signal skills only (see docs/bio.md for the full taxonomy)
 const skills = ['React Native', 'Expo', 'TypeScript', 'React', 'Tailwind CSS', 'Node.js', 'GraphQL', 'PostgreSQL']
+
+// JSON-LD Person schema (issue #8) — the canonical entity for this site, so
+// search engines and LLMs resolve "Nicolas Zilli" to one identity. knowsAbout
+// mirrors the skill chips; sameAs are the cross-site identity backlinks.
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Nicolas Zilli',
+  url: Astro.site?.href,
+  image: new URL(avatar.src, Astro.site).href,
+  jobTitle: 'Lead Mobile Engineer',
+  description:
+    'Lead Mobile Engineer and freelance software developer specialising in React Native and Expo, based in Lyon, France.',
+  worksFor: { '@type': 'Organization', name: 'Tennaxia', url: 'https://www.tennaxia.com' },
+  address: { '@type': 'PostalAddress', addressLocality: 'Lyon', addressCountry: 'FR' },
+  knowsAbout: skills,
+  sameAs: ['https://github.com/nozil', 'https://www.linkedin.com/in/nicolaszilli'],
+}
 ---
 
 <PageLayout title="Nicolas Zilli — Lead Mobile Engineer">
+  <JsonLd schema={personSchema} />
   <section>
     <div class="flex items-center gap-5">
       <img
