@@ -70,9 +70,9 @@ const itemListSchema = {
   <section class="mt-8" aria-label="Projects">
     <ul id="project-grid" class="grid grid-cols-1 gap-5 md:grid-cols-2">
       {
-        projects.map((project) => (
+        projects.map((project, i) => (
           <li data-categories={project.data.categories.join(' ')}>
-            <ProjectCard project={project} />
+            <ProjectCard project={project} priority={i === 0} />
           </li>
         ))
       }

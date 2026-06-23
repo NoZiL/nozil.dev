@@ -11,7 +11,7 @@ role: Lead Mobile Engineer
 client: Tennaxia
 technologies: [React Native, Expo, TypeScript, TanStack Query, Tailwind CSS, Auth0, REST, Turborepo, Claude Code]
 categories: [mobile]
-image: /projects/tennaxia.png
+image: ../../assets/projects/tennaxia.png
 featured: true
 order: 1
 type: work

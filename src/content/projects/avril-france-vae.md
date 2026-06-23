@@ -12,7 +12,7 @@ role: Full Stack Engineer
 client: beta.gouv.fr
 technologies: [Elixir, Phoenix, JavaScript, PostgreSQL]
 categories: [oss, web]
-image: /projects/avril.jpg
+image: ../../assets/projects/avril.jpg
 featured: true
 order: 2
 type: work

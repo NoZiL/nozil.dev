@@ -7,9 +7,10 @@ import SectionHeading from '../SectionHeading.astro'
 import Chip from '../Chip.astro'
 import JsonLd from '../JsonLd.astro'
 import { getLang, localizePath, useTranslations } from '../../i18n/ui'
-// Vendored GitHub avatar (u/3874258 at s=192, converted to webp via sharp),
-// served as a plain <img>: the compile image service can't transform images in
-// this build — it writes to outDir while the CF adapter emits to dist/client.
+import { Image } from 'astro:assets'
+// Vendored GitHub avatar (u/3874258 at s=192, converted to webp via sharp).
+// Rendered with <Image> so it picks up the optimised asset pipeline; eager +
+// high priority because it sits above the fold in the hero.
 import avatar from '../../assets/avatar.webp'
 
 const lang = getLang(Astro.currentLocale)
@@ -47,11 +48,13 @@ const personSchema = {
   <JsonLd schema={personSchema} />
   <section>
     <div class="flex items-center gap-5">
-      <img
-        src={avatar.src}
+      <Image
+        src={avatar}
         alt="Portrait of Nicolas Zilli"
-        width={avatar.width}
-        height={avatar.height}
+        width={96}
+        height={96}
+        loading="eager"
+        fetchpriority="high"
         class="dark:border-dusk-border size-16 rounded-full border border-zinc-200 md:size-20"
       />
       <div>
@@ -86,9 +89,9 @@ const personSchema = {
     </div>
     <ul class="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
       {
-        featured.map((project) => (
+        featured.map((project, i) => (
           <li>
-            <ProjectCard project={project} />
+            <ProjectCard project={project} priority={i === 0} />
           </li>
         ))
       }

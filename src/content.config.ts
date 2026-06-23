@@ -26,35 +26,37 @@ const work = defineCollection({
 // page (featured cards), and /portfolio/[slug] detail pages.
 const projects = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/projects' }),
-  schema: z.object({
-    title: z.string(),
-    // One sentence — what it does and for whom.
-    tagline: z.string(),
-    github: z.url().optional(),
-    // Live / store / case-study links, rendered as labelled buttons.
-    links: z.array(z.object({ label: z.string(), url: z.url() })).default([]),
-    startDate: z.coerce.date(),
-    // null = ongoing
-    endDate: z.coerce.date().nullable().default(null),
-    role: z.string(),
-    client: z.string().optional(),
-    technologies: z.array(z.string()).default([]),
-    // Drives the /portfolio filter chips (All · Mobile · Web · OSS).
-    categories: z.array(z.enum(['mobile', 'web', 'oss'])).default([]),
-    // Optional screenshot path under public/ (e.g. /projects/foo.png). Used for
-    // the card thumbnail and detail-page og:image; falls back to a generated
-    // monogram card when absent. A public/ path (not astro:assets) sidesteps
-    // the compile image-service limitation noted in src/pages/index.astro.
-    image: z.string().optional(),
-    featured: z.boolean().default(false),
-    // Lower sorts first among featured cards (ties break by recency).
-    order: z.number().default(0),
-    // Nature of the project — primary badge (Work · OSS · Personal).
-    type: z.enum(['work', 'oss', 'personal']),
-    // Lifecycle, shown muted alongside the type badge. Orthogonal to repo
-    // visibility — a private-repo project can still be live or archived.
-    status: z.enum(['live', 'archived']).default('live'),
-  }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      // One sentence — what it does and for whom.
+      tagline: z.string(),
+      github: z.url().optional(),
+      // Live / store / case-study links, rendered as labelled buttons.
+      links: z.array(z.object({ label: z.string(), url: z.url() })).default([]),
+      startDate: z.coerce.date(),
+      // null = ongoing
+      endDate: z.coerce.date().nullable().default(null),
+      role: z.string(),
+      client: z.string().optional(),
+      technologies: z.array(z.string()).default([]),
+      // Drives the /portfolio filter chips (All · Mobile · Web · OSS).
+      categories: z.array(z.enum(['mobile', 'web', 'oss'])).default([]),
+      // Optional screenshot under src/assets/projects/ (frontmatter path is
+      // relative to the .md file, e.g. ../../assets/projects/foo.png). The
+      // image() helper resolves it to ImageMetadata so <Image> can emit
+      // optimised, responsive WebP variants; falls back to a generated
+      // monogram card when absent.
+      image: image().optional(),
+      featured: z.boolean().default(false),
+      // Lower sorts first among featured cards (ties break by recency).
+      order: z.number().default(0),
+      // Nature of the project — primary badge (Work · OSS · Personal).
+      type: z.enum(['work', 'oss', 'personal']),
+      // Lifecycle, shown muted alongside the type badge. Orthogonal to repo
+      // visibility — a private-repo project can still be live or archived.
+      status: z.enum(['live', 'archived']).default('live'),
+    }),
 })
 
 export const collections = { work, projects }

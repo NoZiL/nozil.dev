@@ -1,13 +1,17 @@
 ---
 import type { CollectionEntry } from 'astro:content'
+import { Image } from 'astro:assets'
 import Chip from './Chip.astro'
 import { getLang, localizePath, useTranslations } from '../i18n/ui'
 
 interface Props {
   project: CollectionEntry<'projects'>
+  // Eager-load + high fetch priority for the first card in a grid (the likely
+  // LCP element). Cards further down stay lazy. Defaults to lazy.
+  priority?: boolean
 }
 
-const { project } = Astro.props
+const { project, priority = false } = Astro.props
 const { title, tagline, technologies, categories, image, github, links, type, status } = project.data
 const lang = getLang(Astro.currentLocale)
 const t = useTranslations(lang)
@@ -33,7 +37,16 @@ const techOverflow = technologies.length - techPreview.length
   <a href={href} class="block" aria-label={`${title} — view project`}>
     {
       image ? (
-        <img src={image} alt={`${title} screenshot`} width="1024" height="512" class="aspect-2/1 w-full object-cover" />
+        <Image
+          src={image}
+          alt={`${title} screenshot`}
+          widths={[400, 512, 768, 1024]}
+          sizes="(min-width: 640px) 480px, 100vw"
+          format="webp"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchpriority={priority ? 'high' : 'auto'}
+          class="aspect-2/1 w-full object-cover"
+        />
       ) : (
         <div
           aria-hidden="true"
