@@ -46,6 +46,13 @@ export default defineConfig({
     // the IndexNow deploy step (see deploy-production.yml) reads it to pick URLs
     // to submit. Build time is a reasonable proxy: deploys are content-driven.
     sitemap({
+      // Emit <xhtml:link rel="alternate" hreflang> entries pairing each page
+      // with its other-locale equivalent (issue #7). Mirrors the i18n config
+      // below: en is the default (no prefix), fr lives under /fr/.
+      i18n: {
+        defaultLocale: 'en',
+        locales: { en: 'en', fr: 'fr' },
+      },
       serialize(item) {
         item.lastmod = new Date().toISOString()
         return item

@@ -1,0 +1,103 @@
+---
+import { getCollection } from 'astro:content'
+import PageLayout from '../../layouts/PageLayout.astro'
+import ProjectCard from '../ProjectCard.astro'
+import ButtonLink from '../ButtonLink.astro'
+import SectionHeading from '../SectionHeading.astro'
+import Chip from '../Chip.astro'
+import JsonLd from '../JsonLd.astro'
+import { getLang, localizePath, useTranslations } from '../../i18n/ui'
+// Vendored GitHub avatar (u/3874258 at s=192, converted to webp via sharp),
+// served as a plain <img>: the compile image service can't transform images in
+// this build — it writes to outDir while the CF adapter emits to dist/client.
+import avatar from '../../assets/avatar.webp'
+
+const lang = getLang(Astro.currentLocale)
+const t = useTranslations(lang)
+
+// Up to 3 featured projects, ordered by `order` (recency breaks ties) — same
+// component and data as /portfolio, no duplication.
+const featured = (await getCollection('projects'))
+  .filter((p) => p.data.featured)
+  .sort((a, b) => a.data.order - b.data.order || b.data.startDate.getTime() - a.data.startDate.getTime())
+  .slice(0, 3)
+
+// Signal skills only (see docs/bio.md for the full taxonomy)
+const skills = ['React Native', 'Expo', 'TypeScript', 'React', 'Tailwind CSS', 'Node.js', 'GraphQL', 'PostgreSQL']
+
+// JSON-LD Person schema (issue #8) — the canonical entity for this site, so
+// search engines and LLMs resolve "Nicolas Zilli" to one identity. knowsAbout
+// mirrors the skill chips; sameAs are the cross-site identity backlinks.
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Nicolas Zilli',
+  url: Astro.site?.href,
+  image: new URL(avatar.src, Astro.site).href,
+  jobTitle: t.home.schema.jobTitle,
+  description: t.home.schema.description,
+  worksFor: { '@type': 'Organization', name: 'Tennaxia', url: 'https://www.tennaxia.com' },
+  address: { '@type': 'PostalAddress', addressLocality: 'Lyon', addressCountry: 'FR' },
+  knowsAbout: skills,
+  sameAs: ['https://github.com/nozil', 'https://www.linkedin.com/in/nicolaszilli'],
+}
+---
+
+<PageLayout title={t.home.title}>
+  <JsonLd schema={personSchema} />
+  <section>
+    <div class="flex items-center gap-5">
+      <img
+        src={avatar.src}
+        alt="Portrait of Nicolas Zilli"
+        width={avatar.width}
+        height={avatar.height}
+        class="dark:border-dusk-border size-16 rounded-full border border-zinc-200 md:size-20"
+      />
+      <div>
+        <h1 class="text-3xl font-semibold tracking-tight text-zinc-900 md:text-4xl dark:text-violet-100">
+          Nicolas Zilli
+        </h1>
+        <p class="text-accent dark:text-accent-dark mt-2 font-mono text-sm">
+          {t.home.role}
+        </p>
+      </div>
+    </div>
+    <p class="mt-5 max-w-prose text-lg">
+      {t.home.intro}
+    </p>
+  </section>
+
+  <section class="mt-8" aria-label={t.home.skillsLabel}>
+    <ul class="flex flex-wrap gap-2">
+      {skills.map((skill) => <Chip size="md">{skill}</Chip>)}
+    </ul>
+  </section>
+
+  <section class="mt-12" aria-labelledby="featured-heading">
+    <div class="flex items-baseline justify-between gap-4">
+      <SectionHeading id="featured-heading">{t.home.featured}</SectionHeading>
+      <a
+        href={localizePath('/portfolio', lang)}
+        class="hover:text-accent dark:hover:text-accent-dark font-mono text-xs text-zinc-400 dark:text-violet-500"
+      >
+        {t.home.allProjects}
+      </a>
+    </div>
+    <ul class="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
+      {
+        featured.map((project) => (
+          <li>
+            <ProjectCard project={project} />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="mt-12 flex flex-col gap-3 sm:flex-row" aria-label="Call to action">
+    <ButtonLink href={localizePath('/work', lang)} variant="primary">{t.home.cta.viewCv}</ButtonLink>
+    <ButtonLink href={localizePath('/portfolio', lang)} variant="outline">{t.home.cta.portfolio}</ButtonLink>
+    <ButtonLink href={localizePath('/contact', lang)} variant="outline">{t.home.cta.contact}</ButtonLink>
+  </section>
+</PageLayout>

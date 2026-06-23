@@ -1,0 +1,292 @@
+---
+import { getCollection, render } from 'astro:content'
+import PageLayout from '../../layouts/PageLayout.astro'
+import ButtonLink from '../ButtonLink.astro'
+import SectionHeading from '../SectionHeading.astro'
+import Chip from '../Chip.astro'
+import { getLang, useTranslations } from '../../i18n/ui'
+
+const lang = getLang(Astro.currentLocale)
+const t = useTranslations(lang)
+
+// Reverse-chronological: current roles (no endDate) float to the top, then by
+// startDate descending.
+const roles = (await getCollection('work')).sort((a, b) => {
+  const aEnd = a.data.endDate?.getTime() ?? Infinity
+  const bEnd = b.data.endDate?.getTime() ?? Infinity
+  if (aEnd !== bEnd) return bEnd - aEnd
+  return b.data.startDate.getTime() - a.data.startDate.getTime()
+})
+
+const rendered = await Promise.all(roles.map(async (role) => ({ role, Content: (await render(role)).Content })))
+
+// Company & school logos: drop a file named after the entry id (e.g.
+// tennaxia.jpg, cnet.jpg) or school slug (polytech-lyon.jpg) into
+// src/assets/logos/. Missing logos fall back to a monogram, so the page never
+// shows a broken image. Eager glob → fingerprinted asset URL.
+const logoModules = import.meta.glob<string>('../../assets/logos/*.{svg,jpg,jpeg,png}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+})
+const logoFor = (slug: string) =>
+  logoModules[`../../assets/logos/${slug}.jpg`] ??
+  logoModules[`../../assets/logos/${slug}.jpeg`] ??
+  logoModules[`../../assets/logos/${slug}.png`] ??
+  logoModules[`../../assets/logos/${slug}.svg`]
+
+// Two-letter monogram from the company name (handles "C+NET" → "C+").
+const monogram = (company: string) => company.replace(/[^A-Za-z0-9+]/g, '').slice(0, 2)
+
+const dateLocale = lang === 'fr' ? 'fr-FR' : 'en-GB'
+const fmt = (d: Date) => d.toLocaleDateString(dateLocale, { month: 'short', year: 'numeric' })
+
+const typeLabel = t.work.typeLabel
+
+// Skills taxonomy — mirrors the CV (public/nicolas_zilli_resume_intl.pdf).
+const skillGroups = [
+  {
+    name: t.work.skillGroups.mobile,
+    skills: ['React Native', 'Expo', 'TypeScript', 'TanStack Query', 'GraphQL', 'REST', 'Offline-first'],
+  },
+  { name: t.work.skillGroups.frontend, skills: ['React.js', 'Next.js', 'Tailwind CSS'] },
+  {
+    name: t.work.skillGroups.backend,
+    skills: ['Node.js', 'Elixir / Phoenix', 'Go', 'Docker', 'Kubernetes', 'PostgreSQL', 'Redis'],
+  },
+  { name: t.work.skillGroups.authServices, skills: ['Auth0', 'Sendbird', 'Algolia', 'Brevo'] },
+  {
+    name: t.work.skillGroups.tooling,
+    skills: ['GitHub Actions', 'GitLab CI', 'EAS', 'Turborepo', 'App Store / Play Store'],
+  },
+  { name: t.work.skillGroups.ai, skills: ['Claude Code', 'Custom skills & harnesses', 'Cursor'] },
+]
+
+// Terse roles that predate the detailed timeline above (CV "Earlier experience").
+const earlier = [
+  {
+    role: 'Full Stack Engineer',
+    org: 'beta.gouv.fr (Avril / France VAE)',
+    years: '2018–2019',
+    note: t.work.earlier.avril,
+  },
+  {
+    role: 'Full Stack Engineer',
+    org: 'Figaro Classifieds',
+    years: '2016–2018',
+    note: t.work.earlier.figaro,
+  },
+  {
+    role: 'Software Engineer',
+    org: 'Alteca',
+    years: '2014–2015',
+    note: t.work.earlier.alteca,
+  },
+]
+
+// `equivalency` = the international equivalent of the French diploma, shown as
+// a separate, muted line so the real diploma name stays primary.
+interface Education {
+  degree: string
+  major: string
+  equivalency: string
+  school: string
+  logo: string
+  year: string
+}
+const education: Education[] = [
+  {
+    degree: 'Diplôme d’ingénieur',
+    major: t.work.education.polytech.major,
+    equivalency: t.work.education.polytech.equivalency,
+    school: 'Polytech Lyon',
+    logo: 'polytech-lyon',
+    year: '2011–2014',
+  },
+  {
+    degree: 'DUT',
+    major: t.work.education.iut.major,
+    equivalency: t.work.education.iut.equivalency,
+    school: 'IUT Lyon 1',
+    logo: 'iut-lyon-1',
+    year: '2009–2011',
+  },
+]
+---
+
+<PageLayout title={t.work.title} description={t.work.metaDescription}>
+  <section class="flex flex-wrap items-start justify-between gap-4">
+    <h1 class="text-3xl font-semibold tracking-tight text-zinc-900 md:text-4xl dark:text-violet-100">
+      {t.work.heading}
+    </h1>
+    <div class="flex flex-wrap items-center gap-2" data-print-hide>
+      {/* Primary: hand-curated 1-page résumé (static, always available). */}
+      <ButtonLink href="/nicolas_zilli_resume_intl.docx" download variant="primary">{t.work.downloadDocx}</ButtonLink>
+      {/* Secondary: build-time PDF snapshot of this page. */}
+      <ButtonLink href="/cv.pdf" download variant="outline">{t.work.downloadPdf}</ButtonLink>
+    </div>
+  </section>
+
+  <section class="mt-6" aria-label="Summary">
+    <p class="max-w-prose text-lg">
+      {t.work.summary}
+    </p>
+    <p class="dark:border-dusk-border mt-4 rounded-lg border border-zinc-200 p-4 text-sm">
+      <span class="font-medium text-zinc-900 dark:text-violet-100">{t.work.openToLabel}</span>{' '}{
+        t.work.openToText
+      }<span class="font-mono text-xs">{t.work.euCitizen}</span>.
+    </p>
+  </section>
+
+  <section class="mt-12" aria-labelledby="experience-heading">
+    <SectionHeading id="experience-heading">{t.work.experienceHeading}</SectionHeading>
+    <p class="mt-3 max-w-prose text-sm">
+      {t.work.wedoproductBefore}<strong class="font-medium text-zinc-900 dark:text-violet-100"
+        >{t.work.wedoproductName}</strong
+      >{t.work.wedoproductAfter}
+    </p>
+    <ol class="dark:border-dusk-border mt-6 space-y-10 border-l border-zinc-200 pl-6">
+      {
+        rendered.map(({ role, Content }) => (
+          <li class="flex gap-4">
+            {logoFor(role.id) ? (
+              <img
+                src={logoFor(role.id)}
+                alt={`${role.data.company} logo`}
+                width="40"
+                height="40"
+                data-company-badge
+                class="dark:border-dusk-border mt-0.5 size-10 shrink-0 rounded-lg border border-zinc-200 bg-white object-contain p-1"
+              />
+            ) : (
+              <span
+                aria-hidden="true"
+                data-company-badge
+                class="dark:border-dusk-border mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white font-mono text-sm font-medium text-zinc-400"
+              >
+                {monogram(role.data.company)}
+              </span>
+            )}
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                <h3 class="text-lg font-semibold text-zinc-900 dark:text-violet-100">
+                  {role.data.title}
+                  {' · '}
+                  {role.data.companyUrl ? (
+                    <a
+                      href={role.data.companyUrl}
+                      class="hover:text-accent dark:hover:text-accent-dark"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {role.data.company}
+                    </a>
+                  ) : (
+                    <span>{role.data.company}</span>
+                  )}
+                  {role.data.via && (
+                    <span class="font-normal text-zinc-400 dark:text-violet-500"> · {role.data.via}</span>
+                  )}
+                </h3>
+                <p class="font-mono text-xs text-zinc-400 dark:text-violet-500">
+                  {fmt(role.data.startDate)} — {role.data.endDate ? fmt(role.data.endDate) : t.work.present}
+                </p>
+              </div>
+              <p class="mt-1 font-mono text-xs text-zinc-400 dark:text-violet-500">
+                {typeLabel[role.data.type]} · {role.data.location}
+              </p>
+              <div class="prose prose-sm dark:prose-invert mt-3 max-w-none">
+                <Content />
+              </div>
+              {role.data.technologies.length > 0 && (
+                <ul class="mt-4 flex flex-wrap gap-2">
+                  {role.data.technologies.map((tech) => (
+                    <Chip size="md">{tech}</Chip>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="mt-16" aria-labelledby="earlier-heading">
+    <SectionHeading id="earlier-heading">{t.work.earlierHeading}</SectionHeading>
+    <ul class="mt-6 space-y-4">
+      {
+        earlier.map((e) => (
+          <li>
+            <div class="flex flex-wrap items-baseline justify-between gap-x-3">
+              <span class="text-zinc-900 dark:text-violet-100">
+                {e.role} · {e.org}
+              </span>
+              <span class="font-mono text-xs text-zinc-400 dark:text-violet-500">{e.years}</span>
+            </div>
+            <p class="mt-1 text-sm">{e.note}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="mt-16" aria-labelledby="skills-heading">
+    <SectionHeading id="skills-heading">{t.work.skillsHeading}</SectionHeading>
+    <div class="mt-6 space-y-6">
+      {
+        skillGroups.map((group) => (
+          <div>
+            <h3 class="text-sm font-medium text-zinc-900 dark:text-violet-100">{group.name}</h3>
+            <ul class="mt-2 flex flex-wrap gap-2">
+              {group.skills.map((skill) => (
+                <Chip size="md">{skill}</Chip>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="mt-16" aria-labelledby="education-heading">
+    <SectionHeading id="education-heading">{t.work.educationHeading}</SectionHeading>
+    <ul class="mt-6 space-y-4">
+      {
+        education.map((e) => (
+          <li class="flex gap-4">
+            {logoFor(e.logo) ? (
+              <img
+                src={logoFor(e.logo)}
+                alt={`${e.school} logo`}
+                width="40"
+                height="40"
+                data-school-badge
+                class="dark:border-dusk-border mt-0.5 size-10 shrink-0 rounded-lg border border-zinc-200 bg-white object-contain p-1"
+              />
+            ) : (
+              <span
+                aria-hidden="true"
+                data-school-badge
+                class="dark:border-dusk-border mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white font-mono text-sm font-medium text-zinc-400"
+              >
+                {monogram(e.school)}
+              </span>
+            )}
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-baseline justify-between gap-x-3">
+                <span>
+                  <span class="font-medium text-zinc-900 dark:text-violet-100">{e.degree}</span>
+                  <span class="text-zinc-600 dark:text-violet-300"> · {e.major}</span>
+                </span>
+                <span class="font-mono text-xs text-zinc-400 dark:text-violet-500">{e.year}</span>
+              </div>
+              <p class="text-accent dark:text-accent-dark mt-0.5 font-mono text-xs">≈ {e.equivalency}</p>
+              <p class="mt-0.5 text-sm">{e.school}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</PageLayout>

@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content'
 import Chip from './Chip.astro'
+import { getLang, localizePath, useTranslations } from '../i18n/ui'
 
 interface Props {
   project: CollectionEntry<'projects'>
@@ -8,7 +9,9 @@ interface Props {
 
 const { project } = Astro.props
 const { title, tagline, technologies, categories, image, github, links, type, status } = project.data
-const href = `/portfolio/${project.id}`
+const lang = getLang(Astro.currentLocale)
+const t = useTranslations(lang)
+const href = localizePath(`/portfolio/${project.id}`, lang)
 
 // Two-letter monogram for the thumbnail fallback (handles "nozil.dev" → "NO").
 const monogram = title
@@ -16,8 +19,8 @@ const monogram = title
   .slice(0, 2)
   .toUpperCase()
 
-const categoryLabel: Record<string, string> = { mobile: 'Mobile', web: 'Web', oss: 'OSS' }
-const typeLabel: Record<string, string> = { work: 'Work', oss: 'OSS', personal: 'Personal' }
+const categoryLabel = t.project.categoryLabel
+const typeLabel = t.project.typeLabel
 
 // Show at most four tech chips on the card; the detail page lists them all.
 const techPreview = technologies.slice(0, 4)
@@ -48,7 +51,7 @@ const techOverflow = technologies.length - techPreview.length
       </h3>
       <span class="mt-1 flex shrink-0 items-center gap-1.5 font-mono text-xs">
         <span class="text-accent dark:text-accent-dark">{typeLabel[type]}</span>
-        {status === 'archived' && <span class="text-zinc-400 dark:text-violet-500">· Archived</span>}
+        {status === 'archived' && <span class="text-zinc-400 dark:text-violet-500">· {t.project.archived}</span>}
       </span>
     </div>
     <p class="mt-2 flex-1 text-sm text-zinc-600 dark:text-violet-300">{tagline}</p>

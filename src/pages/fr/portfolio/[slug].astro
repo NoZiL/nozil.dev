@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content'
 import type { GetStaticPaths } from 'astro'
-import ProjectBody from '../../components/pages/ProjectBody.astro'
+import ProjectBody from '../../../components/pages/ProjectBody.astro'
 
 export const getStaticPaths = (async () => {
   const projects = await getCollection('projects')

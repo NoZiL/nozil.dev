@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css'
 import { CF_BEACON_TOKEN } from 'astro:env/client'
+import { getLang, localizePath, stripLocale } from '../i18n/ui'
 
 interface Props {
   title: string
@@ -15,9 +16,19 @@ const {
   description = 'Lead Mobile Engineer at Tennaxia · Freelance dev at nozil.dev · React Native & TypeScript · Lyon, France',
   ogImage,
 } = Astro.props
-const lang = Astro.currentLocale ?? 'en'
+const lang = getLang(Astro.currentLocale)
 const canonical = new URL(Astro.url.pathname, Astro.site)
 const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined
+
+// hreflang alternates (issue #7) — the same content path in each locale, plus
+// x-default → en. Derived from the canonical (locale-stripped) path so it works
+// on every page without per-page wiring.
+const shared = stripLocale(Astro.url.pathname)
+const alternates = [
+  { hreflang: 'en', href: new URL(localizePath(shared, 'en'), Astro.site).href },
+  { hreflang: 'fr', href: new URL(localizePath(shared, 'fr'), Astro.site).href },
+  { hreflang: 'x-default', href: new URL(localizePath(shared, 'en'), Astro.site).href },
+]
 ---
 
 <!doctype html>
@@ -30,6 +41,7 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <link rel="canonical" href={canonical} />
+    {alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

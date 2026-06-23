@@ -3,6 +3,8 @@
 // docs/contact-plan.md). Assembled from parts on click so plain-text
 // scrapers find nothing, even in the minified bundle.
 
+import { getLang, useTranslations } from '../i18n/ui'
+
 interface Props {
   // Unique suffix when multiple instances coexist on the same page.
   // Omit for the default (footer) instance.
@@ -11,6 +13,7 @@ interface Props {
 const { suffix } = Astro.props
 const btnId = suffix ? `reveal-email-${suffix}` : 'reveal-email'
 const displayId = suffix ? `email-display-${suffix}` : 'email-display'
+const t = useTranslations(getLang(Astro.currentLocale))
 ---
 
 <button
@@ -18,7 +21,7 @@ const displayId = suffix ? `email-display-${suffix}` : 'email-display'
   id={btnId}
   class="hover:text-accent dark:hover:text-accent-dark cursor-pointer underline decoration-dotted underline-offset-4"
 >
-  Show email
+  {t.email.show}
 </button>
 <span id={displayId} aria-live="polite" tabindex="-1" class="font-mono"></span>
 
