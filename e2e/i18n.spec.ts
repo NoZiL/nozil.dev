@@ -34,25 +34,31 @@ test('French sub-pages render their localized headings', async ({ page }) => {
 })
 
 test('language toggle switches locale and persists in the URL', async ({ page }) => {
+  // Scope to the nav + exact match: "EN"/"FR" would otherwise substring-match
+  // links like "Tennaxia" or "Télécharger en PDF".
+  const nav = page.getByRole('navigation', { name: 'Main' })
+
   // EN → FR from a sub-page keeps the same page
   await page.goto('/work')
-  await page.getByRole('link', { name: 'FR' }).click()
+  await nav.getByRole('link', { name: 'FR', exact: true }).click()
   await expect(page).toHaveURL(/\/fr\/work\/?$/)
   await expect(page.locator('html')).toHaveAttribute('lang', 'fr')
 
   // FR → EN back to the English equivalent
-  await page.getByRole('link', { name: 'EN' }).click()
+  await nav.getByRole('link', { name: 'EN', exact: true }).click()
   await expect(page).toHaveURL(/\/work\/?$/)
   await expect(page).not.toHaveURL(/\/fr\//)
   await expect(page.locator('html')).toHaveAttribute('lang', 'en')
 })
 
 test('the active locale link is marked aria-current', async ({ page }) => {
+  const nav = page.getByRole('navigation', { name: 'Main' })
+
   await page.goto('/')
-  await expect(page.getByRole('link', { name: 'EN' })).toHaveAttribute('aria-current', 'true')
+  await expect(nav.getByRole('link', { name: 'EN', exact: true })).toHaveAttribute('aria-current', 'true')
 
   await page.goto('/fr/')
-  await expect(page.getByRole('link', { name: 'FR' })).toHaveAttribute('aria-current', 'true')
+  await expect(nav.getByRole('link', { name: 'FR', exact: true })).toHaveAttribute('aria-current', 'true')
 })
 
 test('hreflang alternates are present on both locales', async ({ page }) => {
@@ -93,5 +99,5 @@ test('French home: no horizontal overflow and nav stays usable', async ({ page }
   const nav = page.getByRole('navigation', { name: 'Main' })
   await expect(nav.getByRole('link', { name: 'Parcours' })).toBeVisible()
   await expect(nav.getByRole('button', { name: 'Toggle dark mode' })).toBeVisible()
-  await expect(nav.getByRole('link', { name: 'FR' })).toBeVisible()
+  await expect(nav.getByRole('link', { name: 'FR', exact: true })).toBeVisible()
 })
