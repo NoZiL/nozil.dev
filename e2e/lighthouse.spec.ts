@@ -51,7 +51,7 @@ lighthouseTest('home page scores ≥ 95 on Lighthouse SEO', async ({ page, port 
 // public/ tanked the home/portfolio score (LCP ~17s). Lighthouse uses simulated
 // throttling, so the score is hardware-independent enough to gate in CI; the
 // threshold has margin below the ~99 the optimised build scores locally.
-for (const path of ['/', '/portfolio']) {
+for (const path of ['/', '/portfolio', '/work']) {
   lighthouseTest(`${path} scores ≥ 90 on Lighthouse performance`, async ({ page, port }, testInfo) => {
     lighthouseTest.skip(
       testInfo.project.name !== 'chromium',
