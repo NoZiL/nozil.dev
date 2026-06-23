@@ -1,0 +1,36 @@
+---
+// Locale switch (issue #7). Two links to the current page in each locale — the
+// URL is the source of truth (no localStorage). The active locale is marked
+// with aria-current and rendered non-interactive; the other is a plain link, so
+// switching is a normal navigation that persists in the URL.
+import { getLang, localizePath, stripLocale } from '../i18n/ui'
+
+const lang = getLang(Astro.currentLocale)
+const shared = stripLocale(Astro.url.pathname)
+
+const locales = [
+  { code: 'en', label: 'EN', href: localizePath(shared, 'en') },
+  { code: 'fr', label: 'FR', href: localizePath(shared, 'fr') },
+] as const
+
+const active = 'text-zinc-900 dark:text-violet-100'
+const inactive = 'text-zinc-400 hover:text-accent dark:text-violet-500 dark:hover:text-accent-dark'
+---
+
+<div class="flex items-center gap-1 font-mono text-xs" aria-label="Language">
+  {
+    locales.map((l, i) => (
+      <>
+        {i > 0 && <span class="text-zinc-300 dark:text-violet-700">/</span>}
+        <a
+          href={l.href}
+          hreflang={l.code}
+          aria-current={l.code === lang ? 'true' : undefined}
+          class={l.code === lang ? active : inactive}
+        >
+          {l.label}
+        </a>
+      </>
+    ))
+  }
+</div>

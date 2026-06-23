@@ -1,8 +1,10 @@
 ---
 import BaseLayout from './BaseLayout.astro'
 import ThemeToggle from '../components/ThemeToggle.astro'
+import LangToggle from '../components/LangToggle.astro'
 import EmailReveal from '../components/EmailReveal.astro'
 import JsonLd from '../components/JsonLd.astro'
+import { getLang, localizePath, stripLocale, useTranslations } from '../i18n/ui'
 
 interface Crumb {
   name: string
@@ -20,9 +22,13 @@ interface Props {
 
 const { title, description, ogImage, breadcrumbs } = Astro.props
 
-// BreadcrumbList JSON-LD on every page (issue #8). Derive a trail from the path
-// when none is passed: "/portfolio/foo" → Home › Portfolio › Foo.
-const segments = Astro.url.pathname.split('/').filter(Boolean)
+const lang = getLang(Astro.currentLocale)
+const t = useTranslations(lang)
+
+// BreadcrumbList JSON-LD on every page (issue #8). Derive a trail from the
+// locale-stripped path when none is passed: "/fr/portfolio/foo" → Home ›
+// Portfolio › Foo, with each crumb URL localized back to the current locale.
+const segments = stripLocale(Astro.url.pathname).split('/').filter(Boolean)
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 const trail: Crumb[] = breadcrumbs ?? [
   { name: 'Home', url: '/' },
@@ -35,7 +41,7 @@ const breadcrumbSchema = {
     '@type': 'ListItem',
     position: i + 1,
     name: crumb.name,
-    item: new URL(crumb.url, Astro.site).href,
+    item: new URL(localizePath(crumb.url, lang), Astro.site).href,
   })),
 }
 ---
@@ -44,16 +50,19 @@ const breadcrumbSchema = {
   <JsonLd schema={breadcrumbSchema} />
   <div class="mx-auto flex min-h-screen max-w-3xl flex-col px-6">
     <header class="flex items-center justify-between py-6" data-print-hide>
-      <a href="/" class="font-mono text-sm font-medium text-zinc-900 dark:text-violet-100">nozil.dev</a>
+      <a href={localizePath('/', lang)} class="font-mono text-sm font-medium text-zinc-900 dark:text-violet-100"
+        >nozil.dev</a
+      >
       <nav class="flex items-center gap-3 text-sm sm:gap-4" aria-label="Main">
-        <a href="/work" class="hover:text-accent dark:hover:text-accent-dark">Work</a>
-        <a href="/portfolio" class="hover:text-accent dark:hover:text-accent-dark">Portfolio</a>
-        <a href="/contact" class="hover:text-accent dark:hover:text-accent-dark">Contact</a>
+        <a href={localizePath('/work', lang)} class="hover:text-accent dark:hover:text-accent-dark">{t.nav.work}</a>
+        <a href={localizePath('/portfolio', lang)} class="hover:text-accent dark:hover:text-accent-dark"
+          >{t.nav.portfolio}</a
+        >
+        <a href={localizePath('/contact', lang)} class="hover:text-accent dark:hover:text-accent-dark"
+          >{t.nav.contact}</a
+        >
         <ThemeToggle />
-        {/* Placeholder — becomes the locale toggle with i18n (#7) */}
-        <span class="font-mono text-xs text-zinc-400 dark:text-violet-500" title="Version française — coming soon">
-          FR
-        </span>
+        <LangToggle />
       </nav>
     </header>
     <main class="flex-1 py-8">
@@ -71,10 +80,10 @@ const breadcrumbSchema = {
         <EmailReveal />
       </div>
       <p>
-        Built with <a href="https://astro.build" class="hover:text-accent dark:hover:text-accent-dark">Astro</a> &amp; <a
-          href="https://workers.cloudflare.com"
-          class="hover:text-accent dark:hover:text-accent-dark">Cloudflare</a
-        >.
+        {t.footer.builtWith}
+        <a href="https://astro.build" class="hover:text-accent dark:hover:text-accent-dark">Astro</a>
+        {t.footer.and}
+        <a href="https://workers.cloudflare.com" class="hover:text-accent dark:hover:text-accent-dark">Cloudflare</a>.
       </p>
     </footer>
   </div>
