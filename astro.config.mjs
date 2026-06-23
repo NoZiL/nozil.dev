@@ -43,7 +43,7 @@ export default defineConfig({
   integrations: [
     // Stamp every sitemap entry with the build time as <lastmod>. @astrojs/sitemap
     // omits lastmod by default; search engines use it to schedule recrawls, and
-    // the IndexNow deploy step (see deploy-production.yml) reads it to pick URLs
+    // the IndexNow deploy step (deploy-production job in deploy.yml) reads it to pick URLs
     // to submit. Build time is a reasonable proxy: deploys are content-driven.
     sitemap({
       // Emit <xhtml:link rel="alternate" hreflang> entries pairing each page

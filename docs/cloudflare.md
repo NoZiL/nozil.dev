@@ -115,7 +115,7 @@ values go in `.dev.vars` (gitignored).
 is different: the pages it lands on are **prerendered**, so it must be present when
 `pnpm build` runs — it is read via `astro:env/client` in `BaseLayout.astro` and baked into the
 static HTML. That's why it's a GitHub Actions secret (wired into the `pnpm build` step of the
-deploy workflows — `pr-preview.yml`, `deploy-preview.yml`, `deploy-production.yml`), not a
+deploy workflows — `pr-preview.yml`, `deploy.yml`), not a
 Worker dashboard variable. Local builds read it from `.env` (see `.env.example`); omit it and
 the build simply ships no beacon.
 
@@ -144,19 +144,25 @@ repo (env var, not hard-coded) for hygiene and to match the `RESEND_API_KEY` pat
 
 ## Deployment (GitHub Actions)
 
-Deploys run from three single-purpose workflows, each gated by the reusable `ci.yml`
-(pipeline overview in [docs/quality-ci.md](./quality-ci.md)):
+Deploys run from two workflows, each gated by the reusable `ci.yml` (pipeline overview in
+[docs/quality-ci.md](./quality-ci.md)):
 
-| Workflow                | Trigger                    | wrangler                               | Result                                          |
-| ----------------------- | -------------------------- | -------------------------------------- | ----------------------------------------------- |
-| `pr-preview.yml`        | Pull request (open/update) | `versions upload`                      | Ephemeral `pr-<n>` env (GitHub Deployment)      |
-| `deploy-preview.yml`    | Push to `main`             | `deploy -c $(cf-config.mjs --preview)` | Fixed `nozil-dev-preview` Worker, `preview` env |
-| `deploy-production.yml` | Manual (Actions → Run)     | `deploy -c $(cf-config.mjs)`           | Promotes to production (`nozil.dev`)            |
+| Workflow         | Trigger                              | wrangler                               | Result                                            |
+| ---------------- | ------------------------------------ | -------------------------------------- | ------------------------------------------------- |
+| `pr-preview.yml` | Pull request (open/update)           | `versions upload`                      | Ephemeral `pr-<n>` env (GitHub Deployment)        |
+| `deploy.yml`     | Push to `main` + `workflow_dispatch` | `deploy -c $(cf-config.mjs [--preview])` | Fixed `nozil-dev-preview` Worker, then **gated** promote to production (`nozil.dev`) |
 
 `versions upload` stages a new Worker version **without** shifting production traffic and
 returns an ephemeral `*.workers.dev` preview URL — surfaced as a per-PR GitHub Deployment, not
-a comment. Production is never deployed automatically: promote it deliberately via the
-**workflow_dispatch** button (the `production` GitHub Environment can require reviewers).
+a comment.
+
+`deploy.yml` runs the preview deploy (`deploy -c $(cf-config.mjs --preview)`) then the
+production deploy (`deploy -c $(cf-config.mjs)`) as two jobs in one pipeline. Production is
+never reached automatically: the `deploy-production` job targets the `production` GitHub
+Environment, whose **required reviewers** pause the run for approval — on both the `push` and
+`workflow_dispatch` paths (environment protection rules apply to the job regardless of
+trigger). A manual dispatch takes a `target` input (`all` / `only-preview` / `only-production`)
+to scope which stages run; `all` mirrors a push.
 
 The **fixed preview** is a _separate_ Worker. `scripts/cf-config.mjs --preview` emits a config
 that renames it to `nozil-dev-preview`, strips the `nozil.dev` route (it would 409-conflict
@@ -218,8 +224,9 @@ routes = [{ pattern = "nozil.dev", custom_domain = true }]
 
 `custom_domain = true` makes Cloudflare create/manage the proxied DNS record and TLS cert for
 the apex and route it to the `nozil-dev` Worker. The adapter merges this into
-`dist/server/wrangler.json`, so it ships with the **workflow_dispatch** production
-`wrangler deploy` (PR/main `versions upload` does not touch routes).
+`dist/server/wrangler.json`, so it ships with the gated production `wrangler deploy` job in
+`deploy.yml` (reached on a `main` push or `workflow_dispatch`). The PR `versions upload` and
+the fixed-preview deploy (`--preview` config strips the route) do not touch routes.
 
 > **`routes` flips two defaults to `false`** — `wrangler.toml` pins them back:
 >

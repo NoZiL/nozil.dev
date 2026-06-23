@@ -28,8 +28,8 @@ what only time + inbound links can fix.
 
 ## What's automated — IndexNow (Bing + fan-out)
 
-`deploy-production.yml` runs `bojieyang/indexnow-action` after each production
-deploy. IndexNow is a shared protocol: one submission propagates to **Bing,
+The `deploy-production` job in `deploy.yml` runs `bojieyang/indexnow-action` after each
+production deploy. IndexNow is a shared protocol: one submission propagates to **Bing,
 Yandex, Seznam, and Naver**. Submitting to `api.indexnow.org` fans out to all of
 them.
 
@@ -43,8 +43,8 @@ Config that matters:
   deploy. We now also emit `<lastmod>` (see below), but this flag keeps the step
   robust regardless.
 
-**It only fires on a production deploy** (`workflow_dispatch`), not on PR/main
-preview. Verify a run worked: in the deploy log the step should list submitted
+**It only fires on a production deploy** (the gated `deploy-production` job in `deploy.yml`),
+not on the PR or fixed `preview` deploys. Verify a run worked: in the deploy log the step should list submitted
 URLs rather than "No candidate urls need to submit."
 
 **Not covered by IndexNow:** Google and Brave are not participants. Fixing

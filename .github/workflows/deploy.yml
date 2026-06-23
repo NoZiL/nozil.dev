@@ -1,0 +1,118 @@
+name: Deploy
+
+# Single deploy pipeline. A push to main runs CI, deploys the fixed preview
+# Worker, then promotes to production behind the `production` environment's
+# required-reviewer gate. workflow_dispatch mirrors the push flow and adds a
+# `target` selector to run only one stage.
+#
+#   target: all              (default, == push) → preview, then production
+#   target: only-preview     → preview only
+#   target: only-production  → production only (preview skipped)
+#
+# The production reviewer gate applies on BOTH push and dispatch — GitHub
+# environment protection rules fire whenever a job references the environment,
+# regardless of trigger. Without required reviewers configured on the
+# `production` environment (repo Settings → Environments), production deploys
+# with NO approval step on every push to main.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: What to deploy
+        type: choice
+        options: [all, only-preview, only-production]
+        default: all
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy-preview:
+    needs: ci
+    if: >-
+      github.event_name == 'push' ||
+      github.event.inputs.target == 'all' ||
+      github.event.inputs.target == 'only-preview'
+    runs-on: ubuntu-latest
+    # Job-level (not workflow-level) concurrency: a fresh push cancels an
+    # in-flight preview, but must NOT cancel a production job that's parked
+    # waiting for reviewer approval (see deploy-production below).
+    concurrency:
+      group: deploy-preview
+      cancel-in-progress: true
+    environment:
+      name: preview
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # Cloudflare Web Analytics beacon — baked into the build at build time.
+      CF_BEACON_TOKEN: ${{ secrets.CF_BEACON_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - run: corepack enable
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Deploy fixed preview Worker
+        id: deploy
+        run: |
+          set -o pipefail
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID not set — skipping preview deploy. Add repo secrets to enable."
+            exit 0
+          fi
+          cfg=$(node scripts/cf-config.mjs --preview)
+          out=$(pnpm exec wrangler deploy -c "$cfg" 2>&1 | tee /dev/stderr)
+          url=$(printf '%s\n' "$out" | grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' | head -1)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+  deploy-production:
+    # needs deploy-preview so it runs AFTER it on push / target=all. always()
+    # plus the result checks let target=only-production run even though
+    # deploy-preview is skipped in that case.
+    needs: [ci, deploy-preview]
+    if: >-
+      always() &&
+      needs.ci.result == 'success' &&
+      (needs.deploy-preview.result == 'success' || needs.deploy-preview.result == 'skipped') &&
+      (github.event_name == 'push' ||
+       github.event.inputs.target == 'all' ||
+       github.event.inputs.target == 'only-production')
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    environment:
+      name: production
+      url: https://nozil.dev
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # Cloudflare Web Analytics beacon — baked into the build at build time.
+      CF_BEACON_TOKEN: ${{ secrets.CF_BEACON_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - run: corepack enable
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm exec wrangler deploy -c "$(node scripts/cf-config.mjs)"
+      # @astrojs/sitemap emits no <lastmod>, so the action's default
+      # lastmod-required filter dropped every URL ("No candidate urls need to
+      # submit"). Disable that filter to submit all sitemap URLs; api.indexnow.org
+      # fans out to every IndexNow participant (Bing, Yandex, Seznam, Naver).
+      - uses: bojieyang/indexnow-action@v3
+        with:
+          sitemap-location: 'https://nozil.dev/sitemap-0.xml'
+          key: 'e16dc979212c4ded832d4d0805716198'
+          endpoint: 'api.indexnow.org'
+          lastmod-required: 'false'
