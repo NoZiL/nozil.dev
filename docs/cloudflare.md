@@ -100,12 +100,13 @@ Verify with `pnpm exec wrangler whoami`.
 
 ## Environment Variables
 
-| Variable          | Where                                       | When    | Notes                                                       |
-| ----------------- | ------------------------------------------- | ------- | ----------------------------------------------------------- |
-| `RESEND_API_KEY`  | CF Workers dashboard → Settings → Variables | runtime | Resend API key                                              |
-| `EMAIL_FROM`      | CF Workers dashboard → Settings → Variables | runtime | `contact@nozil.dev`                                         |
-| `EMAIL_TO`        | CF Workers dashboard → Settings → Variables | runtime | Destination inbox                                           |
-| `CF_BEACON_TOKEN` | GitHub Actions repo secret                  | build   | Cloudflare Web Analytics beacon token (see Analytics below) |
+| Variable          | Where                                       | When    | Notes                                                                                                                                                                        |
+| ----------------- | ------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RESEND_API_KEY`  | CF Workers dashboard → Settings → Variables | runtime | Resend API key                                                                                                                                                               |
+| `EMAIL_FROM`      | CF Workers dashboard → Settings → Variables | runtime | `contact@nozil.dev`                                                                                                                                                          |
+| `EMAIL_TO`        | CF Workers dashboard → Settings → Variables | runtime | Destination inbox                                                                                                                                                            |
+| `CF_BEACON_TOKEN` | GitHub Actions repo secret                  | build   | Cloudflare Web Analytics beacon token (see Analytics below)                                                                                                                  |
+| `GSC_SA_KEY`      | GitHub Actions repo secret                  | deploy  | Google service-account JSON for the Search Console sitemap submit in the `deploy-production` job (`deploy.yml`; optional, skips if unset — setup in docs/discoverability.md) |
 
 Never commit secrets. Use `wrangler secret put <NAME>` or the CF dashboard. Local dev
 values go in `.dev.vars` (gitignored).
