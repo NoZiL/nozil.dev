@@ -142,6 +142,11 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 24
+          # No deps installed here (the script is zero-dependency Node), so skip
+          # setup-node's package-manager cache — it auto-detects pnpm from
+          # packageManager and fails ("Unable to locate executable file: pnpm")
+          # since this job never sets up corepack/pnpm.
+          package-manager-cache: false
       # Google isn't an IndexNow participant — its only push is the Search
       # Console API's sitemaps.submit (the old google.com/ping endpoint was
       # removed in 2023). The script mints a token from GSC_SA_KEY via the
