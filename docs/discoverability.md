@@ -29,7 +29,7 @@ what only time + inbound links can fix.
 
 ## What's automated — IndexNow (Bing + fan-out)
 
-The `deploy-production` job in `deploy.yml` runs `bojieyang/indexnow-action` after each
+The `reindex-indexnow` job in `deploy.yml` runs `bojieyang/indexnow-action` after each
 production deploy. IndexNow is a shared protocol: one submission propagates to **Bing,
 Yandex, Seznam, and Naver**. Submitting to `api.indexnow.org` fans out to all of
 them.
@@ -44,32 +44,44 @@ Config that matters:
   deploy. We now also emit `<lastmod>` (see below), but this flag keeps the step
   robust regardless.
 
-**It only fires on a production deploy** (the gated `deploy-production` job in `deploy.yml`),
-not on the PR or fixed `preview` deploys. Verify a run worked: in the deploy log the step should list submitted
-URLs rather than "No candidate urls need to submit."
+**It only fires after a production deploy** — `reindex-indexnow` `needs` the
+gated `deploy-production` job, so it never runs on the PR or fixed `preview`
+deploys. Verify a run worked: in the job log the step should list submitted URLs
+rather than "No candidate urls need to submit."
 
 **Not covered by IndexNow:** Google and Brave are not participants. Fixing
 IndexNow helps Bing/Copilot/ChatGPT only.
 
 ## What's automated — Google Search Console (sitemap submit)
 
-The same `deploy-production` job in `deploy.yml` also re-submits the sitemap to
-Google after each production deploy, via the Search Console API `sitemaps.submit`
+The `reindex-google` job in `deploy.yml` re-submits the sitemap to Google after
+each production deploy, via the Search Console API `sitemaps.submit`
 (`PUT /webmasters/v3/sites/{siteUrl}/sitemaps/{feedpath}`). This is Google's
 **only** push: the old `google.com/ping?sitemap=` endpoint was **removed in
 2023**. Re-submitting nudges Google to recrawl using the build-time `<lastmod>`
 stamps (below) — the path to Gemini / AI Overviews.
 
-How it works:
+How it works (`scripts/gsc-submit.mjs`):
 
-- `google-github-actions/auth@v2` exchanges the `GSC_SA_KEY` service-account
-  JSON for a short-lived access token (scope
-  `https://www.googleapis.com/auth/webmasters`); the next step `PUT`s the
-  sitemap.
+- Mints an access token directly from the `GSC_SA_KEY` service-account key with
+  the self-signed **JWT-bearer flow** (RFC 7523), scope
+  `https://www.googleapis.com/auth/webmasters`, then `PUT`s the sitemap.
+- **Why not `google-github-actions/auth`:** its `token_format: access_token`
+  path _impersonates_ the SA via the IAM Credentials API, which needs
+  `roles/iam.serviceAccountTokenCreator` on the SA — a plain key lacks it and the
+  step 403s (`iam.serviceAccounts.getAccessToken denied`). The JWT-bearer flow
+  uses the key as its own identity: no impersonation, no extra IAM role.
 - `siteUrl` is `sc-domain:nozil.dev` (the domain property), `feedpath` is
-  `https://nozil.dev/sitemap-index.xml` — both percent-encoded.
-- **Skips gracefully:** with no `GSC_SA_KEY` secret the auth step is skipped, so
-  the submit step is too, and the deploy stays green.
+  `https://nozil.dev/sitemap-index.xml`.
+- **No-ops gracefully:** with no `GSC_SA_KEY` secret the script exits 0 without
+  doing anything.
+
+Both `reindex-*` jobs run **after** the production deploy and carry no
+`environment:`, so a failed submission shows as a red job (reported) but does
+**not** flip the `production` environment deployment to failed — the site is live
+regardless of whether a ping landed. They're standalone jobs, so GitHub's "Re-run
+failed jobs" replays just the indexation without redeploying the Worker, and one
+engine failing never blocks re-running the other.
 
 The one-time setup (verify the property, create the service account, grant it,
 add the secret) is **"Google Search Console" under One-time manual setup** below.
