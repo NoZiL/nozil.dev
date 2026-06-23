@@ -60,16 +60,20 @@ Google after each production deploy, via the Search Console API `sitemaps.submit
 2023**. Re-submitting nudges Google to recrawl using the build-time `<lastmod>`
 stamps (below) — the path to Gemini / AI Overviews.
 
-How it works:
+How it works (`scripts/gsc-submit.mjs`):
 
-- `google-github-actions/auth@v2` exchanges the `GSC_SA_KEY` service-account
-  JSON for a short-lived access token (scope
-  `https://www.googleapis.com/auth/webmasters`); the next step `PUT`s the
-  sitemap.
+- Mints an access token directly from the `GSC_SA_KEY` service-account key with
+  the self-signed **JWT-bearer flow** (RFC 7523), scope
+  `https://www.googleapis.com/auth/webmasters`, then `PUT`s the sitemap.
+- **Why not `google-github-actions/auth`:** its `token_format: access_token`
+  path _impersonates_ the SA via the IAM Credentials API, which needs
+  `roles/iam.serviceAccountTokenCreator` on the SA — a plain key lacks it and the
+  step 403s (`iam.serviceAccounts.getAccessToken denied`). The JWT-bearer flow
+  uses the key as its own identity: no impersonation, no extra IAM role.
 - `siteUrl` is `sc-domain:nozil.dev` (the domain property), `feedpath` is
-  `https://nozil.dev/sitemap-index.xml` — both percent-encoded.
-- **Skips gracefully:** with no `GSC_SA_KEY` secret the auth step is skipped, so
-  the submit step is too, and the deploy stays green.
+  `https://nozil.dev/sitemap-index.xml`.
+- **No-ops gracefully:** with no `GSC_SA_KEY` secret the script exits 0 without
+  doing anything, so the deploy stays green.
 
 The one-time setup (verify the property, create the service account, grant it,
 add the secret) is **"Google Search Console" under One-time manual setup** below.

@@ -9,7 +9,15 @@ export default [
   {
     // Node scripts (build/deploy helpers) run in the Node runtime.
     files: ['scripts/**/*.{js,mjs}'],
-    languageOptions: { globals: { process: 'readonly', console: 'readonly' } },
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        Buffer: 'readonly',
+        fetch: 'readonly',
+        URLSearchParams: 'readonly',
+      },
+    },
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
