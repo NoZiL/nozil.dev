@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content'
+import { Image } from 'astro:assets'
 import type { GetStaticPaths } from 'astro'
 import PageLayout from '../../layouts/PageLayout.astro'
 import Chip from '../../components/Chip.astro'
@@ -49,7 +50,7 @@ const breadcrumbs = [
 ]
 ---
 
-<PageLayout title={`${title} — Nicolas Zilli`} description={tagline} ogImage={image} breadcrumbs={breadcrumbs}>
+<PageLayout title={`${title} — Nicolas Zilli`} description={tagline} ogImage={image?.src} breadcrumbs={breadcrumbs}>
   <a
     href="/portfolio"
     class="hover:text-accent dark:hover:text-accent-dark font-mono text-xs text-zinc-400 dark:text-violet-500"
@@ -59,11 +60,14 @@ const breadcrumbs = [
 
   {
     image ? (
-      <img
+      <Image
         src={image}
         alt={`${title} screenshot`}
-        width="1024"
-        height="512"
+        widths={[640, 768, 1024, 1536, 2048]}
+        sizes="(min-width: 1024px) 1024px, 100vw"
+        format="webp"
+        loading="eager"
+        fetchpriority="high"
         class="dark:border-dusk-border mt-4 aspect-2/1 w-full rounded-xl border border-zinc-200 object-cover"
       />
     ) : (

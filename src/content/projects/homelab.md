@@ -6,7 +6,7 @@ role: Sole Developer
 client: Personal
 technologies: [Docker, Home Assistant, Jellyfin, LLDAP, Linux]
 categories: []
-image: /projects/homeassistant.png
+image: ../../assets/projects/homeassistant.png
 order: 4
 type: personal
 status: live

@@ -45,3 +45,27 @@ lighthouseTest('home page scores ≥ 95 on Lighthouse SEO', async ({ page, port 
     thresholds: { seo: 95 },
   })
 })
+
+// Performance gate for the image-heavy pages (issue #32). Before the project
+// screenshots moved to astro:assets + <Image>, the raw multi-megabyte PNGs in
+// public/ tanked the home/portfolio score (LCP ~17s). Lighthouse uses simulated
+// throttling, so the score is hardware-independent enough to gate in CI; the
+// threshold has margin below the ~99 the optimised build scores locally.
+for (const path of ['/', '/portfolio']) {
+  lighthouseTest(`${path} scores ≥ 90 on Lighthouse performance`, async ({ page, port }, testInfo) => {
+    lighthouseTest.skip(
+      testInfo.project.name !== 'chromium',
+      'Lighthouse performance audit runs once on desktop chromium'
+    )
+
+    await page.goto(path)
+    await page.waitForLoadState('networkidle')
+
+    await playAudit({
+      page,
+      port,
+      opts: { onlyCategories: ['performance'] },
+      thresholds: { performance: 90 },
+    })
+  })
+}

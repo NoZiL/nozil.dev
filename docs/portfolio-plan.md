@@ -24,7 +24,8 @@ role: Sole Developer               # Sole Developer | Tech Lead | Contributor
 client: Client Name                # optional, can be "Personal" or "Freelance"
 technologies: [React Native, Expo, TypeScript, GraphQL]
 categories: [mobile, web, oss]     # for filter chips
-image: ./screenshot.png            # card thumbnail
+image: ../../assets/projects/foo.png  # screenshot under src/assets/ — the image()
+                                      # schema helper + <Image> emit responsive WebP
 featured: true                     # shows on home page
 status: live                       # live | archived | private
 ---

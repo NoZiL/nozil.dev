@@ -10,7 +10,7 @@ role: Sole Developer
 client: Personal
 technologies: [Astro, Tailwind CSS, TypeScript, Cloudflare Workers, Resend, Claude Code]
 categories: [web]
-image: /projects/nozil.dev.png
+image: ../../assets/projects/nozil.dev.png
 featured: true
 order: 0
 type: personal
