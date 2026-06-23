@@ -96,9 +96,6 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       # Cloudflare Web Analytics beacon — baked into the build at build time.
       CF_BEACON_TOKEN: ${{ secrets.CF_BEACON_TOKEN }}
-      # Google Search Console service-account key (JSON). Unset → the submit
-      # step below no-ops. Setup: docs/discoverability.md.
-      GSC_SA_KEY: ${{ secrets.GSC_SA_KEY }}
     steps:
       - uses: actions/checkout@v5
       - run: corepack enable
@@ -109,6 +106,19 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm exec wrangler deploy -c "$(node scripts/cf-config.mjs)"
+
+  # Search-engine re-indexation runs as separate jobs AFTER a successful
+  # production deploy — not as deploy steps. Two reasons:
+  #   1. They carry no `environment:`, so a failed submission shows as a red job
+  #      (reported) without flipping the `production` environment deployment to
+  #      failed — the site is live regardless of whether a ping landed.
+  #   2. Being standalone jobs, GitHub's "Re-run failed jobs" replays just the
+  #      indexation without redeploying the Worker.
+  # Each engine is its own job so one failing doesn't block re-running the other.
+  reindex-indexnow:
+    needs: deploy-production
+    runs-on: ubuntu-latest
+    steps:
       # @astrojs/sitemap emits no <lastmod>, so the action's default
       # lastmod-required filter dropped every URL ("No candidate urls need to
       # submit"). Disable that filter to submit all sitemap URLs; api.indexnow.org
@@ -119,11 +129,23 @@ jobs:
           key: 'e16dc979212c4ded832d4d0805716198'
           endpoint: 'api.indexnow.org'
           lastmod-required: 'false'
+
+  reindex-google:
+    needs: deploy-production
+    runs-on: ubuntu-latest
+    env:
+      # Google Search Console service-account key (JSON). Unset → the script
+      # no-ops (exit 0). Setup: docs/discoverability.md.
+      GSC_SA_KEY: ${{ secrets.GSC_SA_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
       # Google isn't an IndexNow participant — its only push is the Search
       # Console API's sitemaps.submit (the old google.com/ping endpoint was
       # removed in 2023). The script mints a token from GSC_SA_KEY via the
-      # JWT-bearer flow and PUTs the sitemap; it no-ops without the secret. Needs
-      # the service account to be an Owner of sc-domain:nozil.dev — see
-      # docs/discoverability.md.
+      # JWT-bearer flow and PUTs the sitemap. Needs the service account to be an
+      # Owner of sc-domain:nozil.dev — see docs/discoverability.md.
       - name: Submit sitemap to Google Search Console
         run: node scripts/gsc-submit.mjs

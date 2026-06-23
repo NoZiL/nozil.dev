@@ -100,16 +100,16 @@ The pipeline is one reusable CI workflow plus two deploy workflows (PR previews 
 deploy). Each deploy calls CI as a gate, so nothing ships on a red build (full
 Cloudflare/wrangler details in [docs/cloudflare.md](./cloudflare.md)):
 
-| Workflow                                                                | Trigger                              | Result                                                                                       |
-| ----------------------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------- |
-| [`ci.yml`](../.github/workflows/ci.yml)                                 | `workflow_call`                      | Reusable `quality` + `e2e` gate. Called by both deploys (and so runs on every PR).           |
-| [`pr-preview.yml`](../.github/workflows/pr-preview.yml)                 | PR opened/synchronize/reopened       | CI → `wrangler versions upload` → **ephemeral** `pr-<n>` GitHub environment (no comment)     |
-| [`pr-preview-cleanup.yml`](../.github/workflows/pr-preview-cleanup.yml) | PR closed                            | Deactivates + deletes the `pr-<n>` deployments (kills the ephemeral preview)                 |
-| [`deploy.yml`](../.github/workflows/deploy.yml)                         | push to `main` + `workflow_dispatch` | CI → deploy fixed `nozil-dev-preview` Worker → **gated** promote to production (`nozil.dev`) |
+| Workflow                                                                | Trigger                              | Result                                                                                                                   |
+| ----------------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| [`ci.yml`](../.github/workflows/ci.yml)                                 | `workflow_call`                      | Reusable `quality` + `e2e` gate. Called by both deploys (and so runs on every PR).                                       |
+| [`pr-preview.yml`](../.github/workflows/pr-preview.yml)                 | PR opened/synchronize/reopened       | CI → `wrangler versions upload` → **ephemeral** `pr-<n>` GitHub environment (no comment)                                 |
+| [`pr-preview-cleanup.yml`](../.github/workflows/pr-preview-cleanup.yml) | PR closed                            | Deactivates + deletes the `pr-<n>` deployments (kills the ephemeral preview)                                             |
+| [`deploy.yml`](../.github/workflows/deploy.yml)                         | push to `main` + `workflow_dispatch` | CI → deploy fixed `nozil-dev-preview` Worker → **gated** promote to production (`nozil.dev`) → post-deploy re-indexation |
 
-`deploy.yml` chains both stages: **CI passes → preview deployed → production promoted behind
-the `production` environment's reviewer gate.** A manual `workflow_dispatch` mirrors the push
-flow, with a `target` input to scope it:
+`deploy.yml` chains the stages: **CI passes → preview deployed → production promoted behind
+the `production` environment's reviewer gate → search engines re-indexed.** A manual
+`workflow_dispatch` mirrors the push flow, with a `target` input to scope it:
 
 | `target` (dispatch)      | preview | production        |
 | ------------------------ | ------- | ----------------- |
@@ -120,6 +120,14 @@ flow, with a `target` input to scope it:
 The reviewer gate applies on **both** triggers (push and dispatch) — see GitHub Environments
 below. PR previews and the main `preview`/`production` envs appear in the repo's
 **Environments** tab and on the PR itself (via GitHub Deployments) — no PR comment.
+
+**Post-deploy re-indexation.** Two jobs — `reindex-indexnow` (Bing + fan-out) and
+`reindex-google` (Search Console sitemap submit) — `needs` `deploy-production` and run only
+after it succeeds. They carry **no `environment:`**, so a failed ping shows as a red job
+(reported) but does **not** mark the `production` environment deployment failed: the site is
+already live. Being separate jobs, GitHub's **"Re-run failed jobs"** replays just the
+indexation without redeploying, and one engine failing never blocks re-running the other. See
+[docs/discoverability.md](./discoverability.md).
 
 > **Skipped jobs are now expected.** This consolidates the former split
 > `deploy-preview.yml` + `deploy-production.yml` (whose separate files avoided ever rendering a
