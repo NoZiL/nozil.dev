@@ -147,9 +147,9 @@ repo (env var, not hard-coded) for hygiene and to match the `RESEND_API_KEY` pat
 Deploys run from two workflows, each gated by the reusable `ci.yml` (pipeline overview in
 [docs/quality-ci.md](./quality-ci.md)):
 
-| Workflow         | Trigger                              | wrangler                               | Result                                            |
-| ---------------- | ------------------------------------ | -------------------------------------- | ------------------------------------------------- |
-| `pr-preview.yml` | Pull request (open/update)           | `versions upload`                      | Ephemeral `pr-<n>` env (GitHub Deployment)        |
+| Workflow         | Trigger                              | wrangler                                 | Result                                                                               |
+| ---------------- | ------------------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------ |
+| `pr-preview.yml` | Pull request (open/update)           | `versions upload`                        | Ephemeral `pr-<n>` env (GitHub Deployment)                                           |
 | `deploy.yml`     | Push to `main` + `workflow_dispatch` | `deploy -c $(cf-config.mjs [--preview])` | Fixed `nozil-dev-preview` Worker, then **gated** promote to production (`nozil.dev`) |
 
 `versions upload` stages a new Worker version **without** shifting production traffic and

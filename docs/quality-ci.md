@@ -100,22 +100,22 @@ The pipeline is one reusable CI workflow plus two deploy workflows (PR previews 
 deploy). Each deploy calls CI as a gate, so nothing ships on a red build (full
 Cloudflare/wrangler details in [docs/cloudflare.md](./cloudflare.md)):
 
-| Workflow                                                                | Trigger                        | Result                                                                                   |
-| ----------------------------------------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------- |
-| [`ci.yml`](../.github/workflows/ci.yml)                                 | `workflow_call`                | Reusable `quality` + `e2e` gate. Called by both deploys (and so runs on every PR).       |
-| [`pr-preview.yml`](../.github/workflows/pr-preview.yml)                 | PR opened/synchronize/reopened | CI → `wrangler versions upload` → **ephemeral** `pr-<n>` GitHub environment (no comment) |
-| [`pr-preview-cleanup.yml`](../.github/workflows/pr-preview-cleanup.yml) | PR closed                      | Deactivates + deletes the `pr-<n>` deployments (kills the ephemeral preview)             |
+| Workflow                                                                | Trigger                              | Result                                                                                       |
+| ----------------------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------- |
+| [`ci.yml`](../.github/workflows/ci.yml)                                 | `workflow_call`                      | Reusable `quality` + `e2e` gate. Called by both deploys (and so runs on every PR).           |
+| [`pr-preview.yml`](../.github/workflows/pr-preview.yml)                 | PR opened/synchronize/reopened       | CI → `wrangler versions upload` → **ephemeral** `pr-<n>` GitHub environment (no comment)     |
+| [`pr-preview-cleanup.yml`](../.github/workflows/pr-preview-cleanup.yml) | PR closed                            | Deactivates + deletes the `pr-<n>` deployments (kills the ephemeral preview)                 |
 | [`deploy.yml`](../.github/workflows/deploy.yml)                         | push to `main` + `workflow_dispatch` | CI → deploy fixed `nozil-dev-preview` Worker → **gated** promote to production (`nozil.dev`) |
 
 `deploy.yml` chains both stages: **CI passes → preview deployed → production promoted behind
 the `production` environment's reviewer gate.** A manual `workflow_dispatch` mirrors the push
 flow, with a `target` input to scope it:
 
-| `target` (dispatch)      | preview            | production              |
-| ------------------------ | ------------------ | ----------------------- |
-| `all` (default, == push) | ✓                  | ✓ (after preview)       |
-| `only-preview`           | ✓                  | skip                    |
-| `only-production`        | skip               | ✓                       |
+| `target` (dispatch)      | preview | production        |
+| ------------------------ | ------- | ----------------- |
+| `all` (default, == push) | ✓       | ✓ (after preview) |
+| `only-preview`           | ✓       | skip              |
+| `only-production`        | skip    | ✓                 |
 
 The reviewer gate applies on **both** triggers (push and dispatch) — see GitHub Environments
 below. PR previews and the main `preview`/`production` envs appear in the repo's

@@ -101,6 +101,27 @@ EMAIL_TO=your-inbox@example.com
 
 ---
 
+## Contributing
+
+`pnpm install` wires up a [Lefthook](https://lefthook.dev) **pre-commit** hook that runs
+Prettier on staged files and re-stages the result, so a normal commit is auto-formatted with
+no extra step.
+
+You must format **manually** whenever that hook didn't run, otherwise CI's `pnpm format:check`
+will fail the build:
+
+```bash
+pnpm format        # prettier --write .  — run before pushing
+pnpm format:check  # prettier --check .  — what CI runs
+```
+
+The hook is skipped when you commit with `--no-verify` / `LEFTHOOK=0`, or in an environment
+where `pnpm install` hasn't run (e.g. a fresh CI/agent container — the hook isn't installed
+yet). In those cases run `pnpm format` before pushing. If the hook ever goes missing after an
+install, re-wire it with `pnpm exec lefthook install`.
+
+---
+
 ## Deployment
 
 Cloudflare Workers is connected to this GitHub repo and deploys automatically:
