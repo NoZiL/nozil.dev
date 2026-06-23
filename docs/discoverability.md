@@ -6,8 +6,9 @@ what only time + inbound links can fix.
 
 ## TL;DR
 
-- **There is no single API that tells every engine "I exist."** Only IndexNow
-  offers a push; Google and Brave do not.
+- **There is no single API that tells every engine "I exist."** IndexNow pushes
+  to Bing & co.; Google offers only the Search Console API's `sitemaps.submit`
+  (now automated, below); Brave offers nothing.
 - An LLM answers about you from **two** sources: its frozen **training data**
   (can't edit) and **live retrieval** via its search backend (the fixable part).
   A new site loses on training data and must win on retrieval — which first
@@ -50,6 +51,30 @@ URLs rather than "No candidate urls need to submit."
 **Not covered by IndexNow:** Google and Brave are not participants. Fixing
 IndexNow helps Bing/Copilot/ChatGPT only.
 
+## What's automated — Google Search Console (sitemap submit)
+
+The same `deploy-production` job in `deploy.yml` also re-submits the sitemap to
+Google after each production deploy, via the Search Console API `sitemaps.submit`
+(`PUT /webmasters/v3/sites/{siteUrl}/sitemaps/{feedpath}`). This is Google's
+**only** push: the old `google.com/ping?sitemap=` endpoint was **removed in
+2023**. Re-submitting nudges Google to recrawl using the build-time `<lastmod>`
+stamps (below) — the path to Gemini / AI Overviews.
+
+How it works:
+
+- `google-github-actions/auth@v2` exchanges the `GSC_SA_KEY` service-account
+  JSON for a short-lived access token (scope
+  `https://www.googleapis.com/auth/webmasters`); the next step `PUT`s the
+  sitemap.
+- `siteUrl` is `sc-domain:nozil.dev` (the domain property), `feedpath` is
+  `https://nozil.dev/sitemap-index.xml` — both percent-encoded.
+- **Skips gracefully:** with no `GSC_SA_KEY` secret the auth step is skipped, so
+  the submit step is too, and the deploy stays green.
+
+The one-time setup (verify the property, create the service account, grant it,
+add the secret) is **"Google Search Console" under One-time manual setup** below.
+After that this step is hands-off.
+
 ## Sitemap `<lastmod>`
 
 `astro.config.mjs` stamps every sitemap entry with the build time via
@@ -66,9 +91,50 @@ content-driven, and the site is small enough that uniform timestamps are fine.
 
 These need logins/profile edits that CI can't perform.
 
-1. **Google Search Console** — verify the `nozil.dev` domain (DNS TXT record),
-   submit `https://nozil.dev/sitemap-index.xml` once. Google then auto-recrawls
-   using the `<lastmod>` above. This is the only path to Gemini/AI Overviews.
+1. **Google Search Console** — verify the property, then create a service
+   account so the deploy can auto-submit the sitemap (see "What's automated —
+   Google Search Console" above). This is the only path to Gemini/AI Overviews.
+
+   **a. Verify the domain property.** Search Console → _Add property_ → **Domain**
+   → enter `nozil.dev` → add the TXT record it gives you to Cloudflare DNS →
+   _Verify_. Use the **Domain** type (not "URL prefix") so the property id is
+   `sc-domain:nozil.dev` — what the workflow submits to.
+
+   **b. Create the service account + key (this is the token).**
+   - Go to **Google Cloud Console → IAM & Admin → Service Accounts**
+     (https://console.cloud.google.com/iam-admin/serviceaccounts). Pick or create
+     a project first (any project works — the project only owns the credential;
+     it doesn't have to "contain" the site).
+   - _Create service account_ → name it e.g. `gsc-sitemap-submit` → _Done_ (no
+     project roles needed; access is granted on the Search Console side in step c).
+   - Open the new account → **Keys** tab → _Add key → Create new key → JSON_ →
+     this downloads the key file. **That JSON file is the token** — it's the whole
+     credential, treat it like a password and don't commit it.
+   - Enable the API for the project: **APIs & Services → Library → "Google Search
+     Console API"** (a.k.a. Search Console API / Webmasters) → _Enable_
+     (https://console.cloud.google.com/apis/library/searchconsole.googleapis.com).
+   - Copy the service account's **email** (looks like
+     `gsc-sitemap-submit@<project>.iam.gserviceaccount.com`) — it's in the JSON as
+     `client_email`.
+
+   **c. Grant the service account on the property.** Search Console → _Settings →
+   Users and permissions → Add user_ → paste the service-account email →
+   permission **Owner** (Full lets it read; Owner is required to submit sitemaps).
+
+   **d. Add the key as a GitHub Actions secret** named `GSC_SA_KEY` — paste the
+   **entire JSON file contents** as the value:
+
+   ```bash
+   # gh CLI: read the downloaded file straight into the secret
+   gh secret set GSC_SA_KEY < ~/Downloads/<project>-<id>.json
+   ```
+
+   Or repo **Settings → Secrets and variables → Actions → New repository secret**,
+   name `GSC_SA_KEY`, paste the file's contents. Once set, the next production
+   deploy submits the sitemap automatically; until then the step skips and you can
+   submit `https://nozil.dev/sitemap-index.xml` by hand in Search Console (Google
+   then auto-recrawls using the `<lastmod>` above).
+
 2. **Bing Webmaster Tools** — optional; IndexNow already covers Bing, but adding
    the site lets you see crawl stats and confirm IndexNow submissions land.
 3. **Entity / backlink consolidation** — the fix for "Leo returned RocketReach."

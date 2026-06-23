@@ -96,6 +96,9 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       # Cloudflare Web Analytics beacon — baked into the build at build time.
       CF_BEACON_TOKEN: ${{ secrets.CF_BEACON_TOKEN }}
+      # Google Search Console service-account key (JSON). Unset → the Google
+      # submit steps below skip gracefully. Setup: docs/discoverability.md.
+      GSC_SA_KEY: ${{ secrets.GSC_SA_KEY }}
     steps:
       - uses: actions/checkout@v5
       - run: corepack enable
@@ -116,3 +119,29 @@ jobs:
           key: 'e16dc979212c4ded832d4d0805716198'
           endpoint: 'api.indexnow.org'
           lastmod-required: 'false'
+      # Google isn't an IndexNow participant — its only push is the Search
+      # Console API's sitemaps.submit (the old google.com/ping endpoint was
+      # removed in 2023). Re-submitting nudges a recrawl off the build-time
+      # <lastmod> stamps (see docs/discoverability.md). Needs a service account
+      # granted on the sc-domain:nozil.dev property; absent the GSC_SA_KEY
+      # secret both steps skip, leaving the job green.
+      - name: Authenticate to Google Search Console
+        id: gauth
+        if: ${{ env.GSC_SA_KEY != '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GSC_SA_KEY }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/webmasters
+      - name: Submit sitemap to Google Search Console
+        if: ${{ steps.gauth.outputs.access_token != '' }}
+        env:
+          ACCESS_TOKEN: ${{ steps.gauth.outputs.access_token }}
+        run: |
+          set -o pipefail
+          site='sc-domain:nozil.dev'
+          sitemap='https://nozil.dev/sitemap-index.xml'
+          enc() { jq -rn --arg s "$1" '$s|@uri'; }
+          url="https://www.googleapis.com/webmasters/v3/sites/$(enc "$site")/sitemaps/$(enc "$sitemap")"
+          curl -fsS -X PUT -H "Authorization: Bearer $ACCESS_TOKEN" "$url"
+          echo "::notice::Submitted $sitemap to Google Search Console ($site)."
