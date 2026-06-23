@@ -71,8 +71,8 @@ src/
 ├── pages/          # file-based routes
 │   ├── api/        # contact.ts — server route, prerender=false (POST)
 │   └── fr/         # French locale (/fr/*)
-├── content/        # typed MDX collections: work/, projects/
-│   └── config.ts   # Zod schemas
+├── content.config.ts  # Zod schemas for content collections
+├── content/        # typed Markdown collections: work/, projects/
 ├── i18n/           # en.ts + fr.ts string maps
 └── styles/
     └── global.css  # @import "tailwindcss" + @theme tokens
@@ -101,14 +101,40 @@ EMAIL_TO=your-inbox@example.com
 
 ---
 
+## Contributing
+
+`pnpm install` wires up a [Lefthook](https://lefthook.dev) **pre-commit** hook that runs
+Prettier on staged files and re-stages the result, so a normal commit is auto-formatted with
+no extra step.
+
+You must format **manually** whenever that hook didn't run, otherwise CI's `pnpm format:check`
+will fail the build:
+
+```bash
+pnpm format        # prettier --write .  — run before pushing
+pnpm format:check  # prettier --check .  — what CI runs
+```
+
+The hook is skipped when you commit with `--no-verify` / `LEFTHOOK=0`, or in an environment
+where `pnpm install` hasn't run (e.g. a fresh CI/agent container — the hook isn't installed
+yet). In those cases run `pnpm format` before pushing. If the hook ever goes missing after an
+install, re-wire it with `pnpm exec lefthook install`.
+
+---
+
 ## Deployment
 
-Cloudflare Workers is connected to this GitHub repo and deploys automatically:
+Deploys run through GitHub Actions (wrangler), not a Cloudflare git integration. The quality
+gate (lint, type-check, build, Playwright e2e) must pass first:
 
-- `main` → production ([nozil.dev](https://nozil.dev))
-- Any other branch / open PR → preview deployment
+- **Open PR** → ephemeral `pr-<n>` preview (`wrangler versions upload`)
+- **Push to `main`** → fixed `nozil-dev-preview` staging Worker
+- **Production** ([nozil.dev](https://nozil.dev)) → **manual, gated promotion**: the `deploy.yml`
+  pipeline promotes to production behind the `production` environment's required-reviewer
+  approval (the same pipeline is also runnable via `workflow_dispatch`).
 
-No manual deploy step is required. GitHub Actions runs the quality gate (lint, type-check, build, Playwright e2e) before changes can merge to `main`.
+Full pipeline details: [`docs/quality-ci.md`](./docs/quality-ci.md) and
+[`docs/cloudflare.md`](./docs/cloudflare.md).
 
 ---
 

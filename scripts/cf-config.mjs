@@ -10,7 +10,7 @@
 //   outside the watched directory.
 //
 // `--preview` emits a sibling *.preview.json for the fixed staging Worker
-// (deploy-preview.yml): renamed to `nozil-dev-preview`, with the production
+// (deploy-preview job in deploy.yml): renamed to `nozil-dev-preview`, with the production
 // apex route stripped (it would 409-conflict with prod) and workers_dev
 // re-enabled so it gets a stable *.workers.dev URL.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'

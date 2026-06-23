@@ -96,27 +96,42 @@ Tests run against `pnpm build` + `pnpm preview` — the actual Cloudflare Worker
 
 ## CI/CD
 
-The pipeline is one reusable CI workflow plus three single-purpose deploy workflows. Each
-deploy calls CI as a gate, so nothing ships on a red build; and because every event triggers
-a _different_ workflow file, no job ever renders as "skipped" (full Cloudflare/wrangler
-details in [docs/cloudflare.md](./cloudflare.md)):
+The pipeline is one reusable CI workflow plus two deploy workflows (PR previews and the main
+deploy). Each deploy calls CI as a gate, so nothing ships on a red build (full
+Cloudflare/wrangler details in [docs/cloudflare.md](./cloudflare.md)):
 
-| Workflow                                                                | Trigger                        | Result                                                                                   |
-| ----------------------------------------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------- |
-| [`ci.yml`](../.github/workflows/ci.yml)                                 | `workflow_call`                | Reusable `quality` + `e2e` gate. Called by all three deploys (and so runs on every PR).  |
-| [`pr-preview.yml`](../.github/workflows/pr-preview.yml)                 | PR opened/synchronize/reopened | CI → `wrangler versions upload` → **ephemeral** `pr-<n>` GitHub environment (no comment) |
-| [`pr-preview-cleanup.yml`](../.github/workflows/pr-preview-cleanup.yml) | PR closed                      | Deactivates + deletes the `pr-<n>` deployments (kills the ephemeral preview)             |
-| [`deploy-preview.yml`](../.github/workflows/deploy-preview.yml)         | push to `main`                 | CI → deploy the **fixed** `nozil-dev-preview` Worker → `preview` GitHub environment      |
-| [`deploy-production.yml`](../.github/workflows/deploy-production.yml)   | `workflow_dispatch` (manual)   | CI → `wrangler deploy` → `production` GitHub environment (reviewer-gated)                |
+| Workflow                                                                | Trigger                              | Result                                                                                       |
+| ----------------------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------- |
+| [`ci.yml`](../.github/workflows/ci.yml)                                 | `workflow_call`                      | Reusable `quality` + `e2e` gate. Called by both deploys (and so runs on every PR).           |
+| [`pr-preview.yml`](../.github/workflows/pr-preview.yml)                 | PR opened/synchronize/reopened       | CI → `wrangler versions upload` → **ephemeral** `pr-<n>` GitHub environment (no comment)     |
+| [`pr-preview-cleanup.yml`](../.github/workflows/pr-preview-cleanup.yml) | PR closed                            | Deactivates + deletes the `pr-<n>` deployments (kills the ephemeral preview)                 |
+| [`deploy.yml`](../.github/workflows/deploy.yml)                         | push to `main` + `workflow_dispatch` | CI → deploy fixed `nozil-dev-preview` Worker → **gated** promote to production (`nozil.dev`) |
 
-Promotion chain: **CI passes → preview deployed → production promoted manually.** PR previews
-and the main `preview` env appear in the repo's **Environments** tab and on the PR itself
-(via GitHub Deployments) — no PR comment.
+`deploy.yml` chains both stages: **CI passes → preview deployed → production promoted behind
+the `production` environment's reviewer gate.** A manual `workflow_dispatch` mirrors the push
+flow, with a `target` input to scope it:
+
+| `target` (dispatch)      | preview | production        |
+| ------------------------ | ------- | ----------------- |
+| `all` (default, == push) | ✓       | ✓ (after preview) |
+| `only-preview`           | ✓       | skip              |
+| `only-production`        | skip    | ✓                 |
+
+The reviewer gate applies on **both** triggers (push and dispatch) — see GitHub Environments
+below. PR previews and the main `preview`/`production` envs appear in the repo's
+**Environments** tab and on the PR itself (via GitHub Deployments) — no PR comment.
+
+> **Skipped jobs are now expected.** This consolidates the former split
+> `deploy-preview.yml` + `deploy-production.yml` (whose separate files avoided ever rendering a
+> "skipped" job). The `deploy-production` job now shows as **skipped** on pushes/dispatches
+> that don't promote to prod (e.g. `target: only-preview`) — an accepted trade-off for a
+> single chained pipeline.
 
 ### CI gate — `ci.yml`
 
 `ci.yml` is `workflow_call`-only (not triggered directly on `pull_request`/`push`) so it runs
-exactly once per ref, invoked by whichever deploy workflow owns the event:
+exactly once per ref, invoked by whichever deploy workflow owns the event (`deploy.yml` for
+pushes to `main` and manual dispatches, `pr-preview.yml` for PRs):
 
 - **quality** job: `pnpm lint` → `format:check` → `typecheck` → `build`
 - **e2e** job (needs quality — no point running Playwright if the build is broken):
@@ -128,7 +143,13 @@ exactly once per ref, invoked by whichever deploy workflow owns the event:
 
 Create these in repo Settings → Environments:
 
-- **`production`** — add **required reviewers** for the manual-deploy approval gate.
+- **`production`** — add **required reviewers**. This is the **only** thing that makes the
+  production promotion in `deploy.yml` a manual step: the gate is a GitHub environment
+  protection rule, not workflow code, and it fires whenever the `deploy-production` job runs —
+  on both `push` and `workflow_dispatch`. **Without required reviewers configured here, every
+  push to `main` deploys straight to production with no approval.** (A `workflow_dispatch` is
+  itself a manual action, so the extra approval is one self-approve click unless you enable
+  "Prevent self-review" for a second-person check.)
 - **`preview`** — the fixed staging Worker (`nozil-dev-preview.*.workers.dev`).
 - **`pr-*`** — auto-created per PR, auto-removed on close by `pr-preview-cleanup.yml`. (Full
   environment deletion needs admin rights the default `GITHUB_TOKEN` may lack; the cleanup
