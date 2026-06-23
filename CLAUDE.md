@@ -61,6 +61,20 @@ src/
 - Email address must **never appear in static HTML** — assemble via JS reveal only
 - Zero client-side JS on static pages; use Astro islands (`client:load` etc.) only where interactivity is required
 
+## Keep Docs in Sync
+
+Docs are part of the change, not an afterthought. Before finishing any task that touches code,
+config, workflows, scripts, or dependencies, check whether the docs that describe that behavior
+have gone stale — and update them **in the same PR**.
+
+- **Where to look**: `README.md`, everything under `docs/`, and this `CLAUDE.md`. Grep for the
+  thing you changed (a workflow/file name, env var, command, version) to find every reference.
+- **Common drift sources**: deploy/CI pipeline changes (`.github/workflows/`), renamed or
+  deleted files, `package.json` scripts, dependency bumps (the version table in
+  `docs/tech-stack.md`), env vars, and the source-layout trees in `README.md` / `CLAUDE.md`.
+- **When unsure**, flag the doc you suspect is outdated to the user rather than leaving a known
+  inaccuracy in place.
+
 ## Security (public repo)
 
 This repository is **public**. Never introduce any of the following into source files or docs:
