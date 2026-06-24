@@ -50,9 +50,22 @@ const breadcrumbSchema = {
   <JsonLd schema={breadcrumbSchema} />
   <div class="mx-auto flex min-h-screen max-w-3xl flex-col px-6">
     <header class="flex items-center justify-between py-6" data-print-hide>
-      <a href={localizePath('/', lang)} class="font-mono text-sm font-medium text-zinc-900 dark:text-violet-100"
-        >nozil.dev</a
+      <a
+        href={localizePath('/', lang)}
+        class="flex items-center gap-2 text-zinc-900 dark:text-violet-100"
+        aria-label="nozil.dev — home"
       >
+        {/* Z mark: glyph follows currentColor (theme-adaptive), caret stays brand cyan */}
+        <svg viewBox="14 14 78 72" class="h-5 w-auto" aria-hidden="true">
+          <rect x="14" y="14" width="60" height="17" fill="currentColor"></rect>
+          <rect x="14" y="69" width="60" height="17" fill="currentColor"></rect>
+          <polygon points="56,31 74,31 32,69 14,69" fill="currentColor"></polygon>
+          <rect x="79" y="69" width="13" height="17" fill="#22D3EE"></rect>
+        </svg>
+        <span class="font-mono text-sm font-medium"
+          >nozil<span class="text-accent dark:text-accent-dark">.dev</span></span
+        >
+      </a>
       <nav class="flex items-center gap-3 text-sm sm:gap-4" aria-label="Main">
         <a href={localizePath('/work', lang)} class="hover:text-accent dark:hover:text-accent-dark">{t.nav.work}</a>
         <a href={localizePath('/portfolio', lang)} class="hover:text-accent dark:hover:text-accent-dark"
