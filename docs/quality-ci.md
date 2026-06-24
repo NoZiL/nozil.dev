@@ -159,9 +159,14 @@ Create these in repo Settings → Environments:
   itself a manual action, so the extra approval is one self-approve click unless you enable
   "Prevent self-review" for a second-person check.)
 - **`preview`** — the fixed staging Worker (`nozil-dev-preview.*.workers.dev`).
-- **`pr-*`** — auto-created per PR, auto-removed on close by `pr-preview-cleanup.yml`. (Full
-  environment deletion needs admin rights the default `GITHUB_TOKEN` may lack; the cleanup
-  always clears the deployments, and best-effort deletes the environment.)
+- **`pr-*`** — auto-created per PR, cleaned up on close by `pr-preview-cleanup.yml`. The job
+  always deactivates + deletes the deployments inside the env (only needs `deployments: write`).
+  Deleting the **empty environment husk** itself needs repo-administration scope, which is _not_
+  a grantable workflow `permissions:` key — the default `GITHUB_TOKEN` always 403s on it
+  (`Resource not accessible by integration`). To remove the husk too, set an optional
+  **`ENV_CLEANUP_TOKEN`** repo secret (a PAT or GitHub App token with `administration:write`);
+  the workflow falls back to `GITHUB_TOKEN` when it's unset, so the husk is simply left behind
+  (harmless — no deployments, no Cloudflare resources) and the job stays green.
 
 ### Branch protection on `main`
 
