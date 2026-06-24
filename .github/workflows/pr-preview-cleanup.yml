@@ -18,6 +18,14 @@ jobs:
     steps:
       - uses: actions/github-script@v8
         with:
+          # Deleting deployments only needs `deployments: write` (granted above,
+          # available on the default GITHUB_TOKEN). Deleting the *environment*
+          # needs repo-administration scope, which is NOT a grantable workflow
+          # permission — the default token always 403s on it. Set the optional
+          # ENV_CLEANUP_TOKEN secret (PAT or App token with `administration:write`)
+          # to also remove the empty pr-<n> husk; unset → husk is left behind but
+          # the job stays green (deployments are already cleared either way).
+          github-token: ${{ secrets.ENV_CLEANUP_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const environment = `pr-${context.issue.number}`
             const { owner, repo } = context.repo
@@ -38,8 +46,10 @@ jobs:
               await github.rest.repos.deleteDeployment({ owner, repo, deployment_id: d.id })
             }
             core.info(`Removed ${deployments.length} deployment(s) for ${environment}`)
-            // Deleting the environment itself needs admin rights the default
-            // GITHUB_TOKEN may lack — best effort, the deployments are already gone.
+            // Deleting the environment itself needs repo-administration scope,
+            // which the default GITHUB_TOKEN cannot have (not a grantable
+            // workflow permission). Succeeds only when ENV_CLEANUP_TOKEN is set;
+            // otherwise it 403s — best effort, the deployments are already gone.
             try {
               await github.rest.repos.deleteAnEnvironment({ owner, repo, environment_name: environment })
               core.info(`Deleted environment ${environment}`)
