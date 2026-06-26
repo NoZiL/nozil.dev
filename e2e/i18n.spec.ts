@@ -33,6 +33,21 @@ test('French sub-pages render their localized headings', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Tous' })).toBeVisible()
 })
 
+test('work and project entries are translated per locale', async ({ page }) => {
+  // The collection bodies live in locale-specific Markdown (work/<lang>/,
+  // projects/<lang>/) — the FR pages must render French, the EN pages English.
+  await page.goto('/fr/work')
+  await expect(page.getByText(/Seul développeur pendant quatre ans/)).toBeVisible()
+  await page.goto('/work')
+  await expect(page.getByText(/Sole engineer for four years/)).toBeVisible()
+
+  // Detail pages share a slug across locales; each serves its own language.
+  await page.goto('/fr/portfolio/cnet')
+  await expect(page.getByText(/application Android de terrain conçue sur mesure/)).toBeVisible()
+  await page.goto('/portfolio/cnet')
+  await expect(page.getByText(/purpose-built Android field app/)).toBeVisible()
+})
+
 test('language toggle switches locale and persists in the URL', async ({ page }) => {
   // Scope to the nav + exact match: "EN"/"FR" would otherwise substring-match
   // links like "Tennaxia" or "Télécharger en PDF".

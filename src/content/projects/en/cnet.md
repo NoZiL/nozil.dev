@@ -7,7 +7,7 @@ role: Lead Mobile Engineer
 client: C+NET (via WeDoProduct)
 technologies: [React Native, Expo, TypeScript, GraphQL, MDM/EMM]
 categories: [mobile]
-image: ../../assets/projects/c+net.tablette.jpeg
+image: ../../../assets/projects/c+net.tablette.jpeg
 order: 6
 type: work
 status: live

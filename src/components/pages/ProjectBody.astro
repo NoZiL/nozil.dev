@@ -7,6 +7,7 @@ import Chip from '../Chip.astro'
 import ButtonLink from '../ButtonLink.astro'
 import SectionHeading from '../SectionHeading.astro'
 import { getLang, localizePath, useTranslations } from '../../i18n/ui'
+import { entrySlug } from '../../i18n/content'
 
 interface Props {
   project: CollectionEntry<'projects'>
@@ -51,7 +52,7 @@ const typeLabel = t.project.typeLabel
 const breadcrumbs = [
   { name: 'Home', url: '/' },
   { name: 'Portfolio', url: '/portfolio' },
-  { name: title, url: `/portfolio/${project.id}` },
+  { name: title, url: `/portfolio/${entrySlug(project.id)}` },
 ]
 ---
 

@@ -10,7 +10,7 @@ role: Lead Mobile Engineer
 client: CVDesignR
 technologies: [React Native, Expo, TypeScript, Brevo, EAS]
 categories: [mobile]
-image: ../../assets/projects/talentpicker.png
+image: ../../../assets/projects/talentpicker.png
 order: 3
 type: work
 status: archived

@@ -1,5 +1,4 @@
 ---
-import { getCollection } from 'astro:content'
 import PageLayout from '../../layouts/PageLayout.astro'
 import ProjectCard from '../ProjectCard.astro'
 import ButtonLink from '../ButtonLink.astro'
@@ -7,6 +6,7 @@ import SectionHeading from '../SectionHeading.astro'
 import Chip from '../Chip.astro'
 import JsonLd from '../JsonLd.astro'
 import { getLang, localizePath, useTranslations } from '../../i18n/ui'
+import { getLocalizedEntries } from '../../i18n/content'
 import { Image } from 'astro:assets'
 // Vendored GitHub avatar (u/3874258 at s=192, converted to webp via sharp).
 // Rendered with <Image> so it picks up the optimised asset pipeline; eager +
@@ -18,7 +18,7 @@ const t = useTranslations(lang)
 
 // Up to 3 featured projects, ordered by `order` (recency breaks ties) — same
 // component and data as /portfolio, no duplication.
-const featured = (await getCollection('projects'))
+const featured = (await getLocalizedEntries('projects', lang))
   .filter((p) => p.data.featured)
   .sort((a, b) => a.data.order - b.data.order || b.data.startDate.getTime() - a.data.startDate.getTime())
   .slice(0, 3)
