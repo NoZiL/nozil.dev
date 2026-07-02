@@ -77,7 +77,7 @@ export default defineConfig({
                 margin: { top: '1.5cm', bottom: '1.5cm', left: '1.5cm', right: '1.5cm' },
               },
             },
-            pages: { '/work': true },
+            pages: { '/work': true, '/fr/work': 'cv_fr.pdf' },
           }),
         ]
       : []),

@@ -27,17 +27,24 @@ curated wording.
   they have no Markdown body). Education splits `degree` / `major` / `equivalency` / `school`.
 - **Logos** — company & school logos in `src/assets/logos/`, looked up by entry id / school slug
   with a monogram fallback. See that folder's README.
-- **Downloads** — two CTAs on `/work`:
-  - _primary_ **Download CV (DOCX)** → `public/nicolas_zilli_resume_intl.docx` (hand-curated 1-pager,
-    served statically).
-  - _secondary_ **Download as PDF** → `public/cv.pdf`.
-- **PDF generation** — `astro-pdf` snapshots `/work` → `cv.pdf`, but it's **opt-in** (gated behind
-  `GENERATE_PDF` in `astro.config.mjs`) because headless Chromium is flaky to provision in CI.
-  Regenerate locally and commit when `/work` changes:
+- **Downloads** — two CTAs on `/work` (and their `/fr/work` equivalents), both locale-aware
+  (`WorkBody.astro` picks the href from `lang`):
+  - _primary_ **Download CV (DOCX)** → `public/nicolas_zilli_resume_intl.docx` (EN) /
+    `public/nicolas_zilli_cv_fr.docx` (FR) — hand-curated 1-pagers, served statically.
+  - _secondary_ **Download as PDF** → `public/cv.pdf` (EN) / `public/cv_fr.pdf` (FR).
+- **PDF generation** — `astro-pdf` snapshots `/work` → `cv.pdf` and `/fr/work` → `cv_fr.pdf`, but
+  it's **opt-in** (gated behind `GENERATE_PDF` in `astro.config.mjs`) because headless Chromium is
+  flaky to provision in CI. Regenerate locally and commit when `/work` or `/fr/work` changes:
 
   ```bash
-  pnpm cv:pdf   # GENERATE_PDF=1 astro build → copies dist/client/cv.pdf to public/cv.pdf
+  pnpm cv:pdf   # rm old PDFs → GENERATE_PDF=1 astro build → copies dist/client/{cv.pdf,cv_fr.pdf} to public/
   ```
 
+  The script deletes the previously committed PDFs before building: `public/` is copied into
+  `dist/client` verbatim ahead of the astro-pdf step, so a stale `cv.pdf` already sitting there
+  causes astro-pdf to detect a "file already exists" collision and write the fresh snapshot to
+  `cv-1.pdf` instead — silently leaving the stale PDF in place. Removing the old files first
+  guarantees astro-pdf writes straight to `cv.pdf` / `cv_fr.pdf`.
+
   Normal `pnpm build` (CI + deploy) skips astro-pdf entirely and serves the committed
-  `public/cv.pdf` — no browser dependency, no flakiness.
+  `public/cv.pdf` / `public/cv_fr.pdf` — no browser dependency, no flakiness.
