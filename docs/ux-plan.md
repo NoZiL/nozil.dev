@@ -81,7 +81,10 @@ Mobile-first: unprefixed Tailwind classes target a 360px viewport, then layer
 every feature PR:
 
 - **Nav**: stays a single row at all widths — 3–4 short links, no hamburger menu.
-  If the i18n + theme toggles crowd 360px, collapse toggles to icons, not a menu.
+  If the i18n + theme toggles crowd 360px, collapse toggles to icons, not a menu. The
+  "Hire me" CTA (links out to Malt) follows the same rule: icon-only below `sm`, full
+  label from `sm` up. The wordmark next to the logo mark drops below `sm` for the same
+  reason — the icon mark + `aria-label` on the home link carry it on narrow viewports.
 - **Home**: hero scales down (`text-3xl md:text-4xl`), skill chips wrap, CTA row stacks
   (`flex-col sm:flex-row`).
 - **Work**: role header (company · title · dates) wraps gracefully; tech tags wrap;

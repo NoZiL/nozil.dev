@@ -39,6 +39,10 @@ test('nav and CTA links point to the right routes', async ({ page }) => {
   await expect(nav.getByRole('link', { name: 'Work' })).toHaveAttribute('href', '/work')
   await expect(nav.getByRole('link', { name: 'Portfolio' })).toHaveAttribute('href', '/portfolio')
   await expect(nav.getByRole('link', { name: 'Contact' })).toHaveAttribute('href', '/contact')
+  await expect(nav.getByRole('link', { name: 'Hire me' })).toHaveAttribute(
+    'href',
+    'https://www.malt.fr/profile/nicolaszilli'
+  )
 
   await expect(page.getByRole('link', { name: 'View CV' })).toHaveAttribute('href', '/work')
   await expect(page.getByRole('link', { name: 'See portfolio' })).toHaveAttribute('href', '/portfolio')
@@ -121,4 +125,6 @@ test('no horizontal overflow and nav stays usable', async ({ page }) => {
   const nav = page.getByRole('navigation', { name: 'Main' })
   await expect(nav.getByRole('link', { name: 'Work' })).toBeVisible()
   await expect(nav.getByRole('button', { name: 'Toggle dark mode' })).toBeVisible()
+  // "Hire me" collapses to an icon-only button below sm — same accessible name either way.
+  await expect(nav.getByRole('link', { name: 'Hire me' })).toBeVisible()
 })

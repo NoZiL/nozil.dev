@@ -9,6 +9,7 @@ export const fr: UI = {
     portfolio: 'Portfolio',
     contact: 'Contact',
     language: 'Langue',
+    hireMe: 'Me recruter',
   },
   footer: {
     builtWith: 'Conçu avec',

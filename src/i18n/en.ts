@@ -8,7 +8,7 @@
 // files under <collection>/<lang>/ — see src/i18n/content.ts and docs/concept.md.
 
 export const en: {
-  nav: { work: string; portfolio: string; contact: string; language: string }
+  nav: { work: string; portfolio: string; contact: string; language: string; hireMe: string }
   footer: { builtWith: string; and: string }
   email: { show: string }
   home: {
@@ -100,6 +100,7 @@ export const en: {
     portfolio: 'Portfolio',
     contact: 'Contact',
     language: 'Language',
+    hireMe: 'Hire me',
   },
   footer: {
     builtWith: 'Built with',
