@@ -4,7 +4,8 @@
 //
 // Scope: UI/chrome strings and page prose authored in the page templates.
 // Long-form content in the work/ and projects/ collections (role bullets,
-// project case studies) is not translated here — see docs/concept.md.
+// project case studies) is translated separately via locale-specific Markdown
+// files under <collection>/<lang>/ — see src/i18n/content.ts and docs/concept.md.
 
 export const en: {
   nav: { work: string; portfolio: string; contact: string; language: string }

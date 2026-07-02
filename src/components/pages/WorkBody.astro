@@ -1,17 +1,18 @@
 ---
-import { getCollection, render } from 'astro:content'
+import { render } from 'astro:content'
 import PageLayout from '../../layouts/PageLayout.astro'
 import ButtonLink from '../ButtonLink.astro'
 import SectionHeading from '../SectionHeading.astro'
 import Chip from '../Chip.astro'
 import { getLang, useTranslations } from '../../i18n/ui'
+import { entrySlug, getLocalizedEntries } from '../../i18n/content'
 
 const lang = getLang(Astro.currentLocale)
 const t = useTranslations(lang)
 
 // Reverse-chronological: current roles (no endDate) float to the top, then by
 // startDate descending.
-const roles = (await getCollection('work')).sort((a, b) => {
+const roles = (await getLocalizedEntries('work', lang)).sort((a, b) => {
   const aEnd = a.data.endDate?.getTime() ?? Infinity
   const bEnd = b.data.endDate?.getTime() ?? Infinity
   if (aEnd !== bEnd) return bEnd - aEnd
@@ -149,9 +150,9 @@ const education: Education[] = [
       {
         rendered.map(({ role, Content }) => (
           <li class="flex gap-4">
-            {logoFor(role.id) ? (
+            {logoFor(entrySlug(role.id)) ? (
               <img
-                src={logoFor(role.id)}
+                src={logoFor(entrySlug(role.id))}
                 alt={`${role.data.company} logo`}
                 width="40"
                 height="40"

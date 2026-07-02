@@ -1,11 +1,13 @@
 ---
-import { getCollection } from 'astro:content'
 import type { GetStaticPaths } from 'astro'
 import ProjectBody from '../../components/pages/ProjectBody.astro'
+import { entrySlug, getLocalizedEntries } from '../../i18n/content'
 
+// One detail page per project slug, in English. Slugs are locale-independent,
+// so /portfolio/<slug> and /fr/portfolio/<slug> stay symmetric (see content.ts).
 export const getStaticPaths = (async () => {
-  const projects = await getCollection('projects')
-  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }))
+  const projects = await getLocalizedEntries('projects', 'en')
+  return projects.map((project) => ({ params: { slug: entrySlug(project.id) }, props: { project } }))
 }) satisfies GetStaticPaths
 
 const { project } = Astro.props

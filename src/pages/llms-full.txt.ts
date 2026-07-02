@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { getCollection } from 'astro:content'
+import { entrySlug, getLocalizedEntries } from '../i18n/content'
 
 // Extended llms.txt (https://llmstxt.org) — the long-form companion to the
 // curated public/llms.txt. Generated at build time from the work + projects
@@ -11,14 +11,14 @@ const dateRange = (start: Date, end: Date | null) => `${fmtMonth(start)} – ${e
 
 export const GET: APIRoute = async () => {
   // Reverse-chronological: current roles (no endDate) first, then by start date.
-  const work = (await getCollection('work')).sort((a, b) => {
+  const work = (await getLocalizedEntries('work', 'en')).sort((a, b) => {
     const aEnd = a.data.endDate?.getTime() ?? Infinity
     const bEnd = b.data.endDate?.getTime() ?? Infinity
     if (aEnd !== bEnd) return bEnd - aEnd
     return b.data.startDate.getTime() - a.data.startDate.getTime()
   })
 
-  const projects = (await getCollection('projects')).sort((a, b) => {
+  const projects = (await getLocalizedEntries('projects', 'en')).sort((a, b) => {
     if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1
     if (a.data.featured && b.data.featured && a.data.order !== b.data.order) return a.data.order - b.data.order
     const aEnd = a.data.endDate?.getTime() ?? Infinity
@@ -85,7 +85,7 @@ Links:
       technologies.length ? `Tech: ${technologies.join(', ')}` : null,
       github ? `GitHub: ${github}` : null,
       ...links.map((l) => `${l.label}: ${l.url}`),
-      `Details: https://nozil.dev/portfolio/${project.id}`,
+      `Details: https://nozil.dev/portfolio/${entrySlug(project.id)}`,
     ]
       .filter(Boolean)
       .join('\n')

@@ -2,9 +2,12 @@ import { defineCollection } from 'astro:content'
 import { glob } from 'astro/loaders'
 import { z } from 'zod'
 
-// One Markdown file per role in src/content/work/. Fields mirror docs/cv-plan.md.
+// One Markdown file per role, under a locale subdir: src/content/work/<lang>/<slug>.md
+// (e.g. work/en/cnet.md, work/fr/cnet.md). The entry id is `<lang>/<slug>`; the slug
+// is locale-independent so /work and /fr/work render one timeline per locale and the
+// hreflang alternates line up. See src/i18n/content.ts. Fields mirror docs/cv-plan.md.
 const work = defineCollection({
-  loader: glob({ pattern: '*.md', base: './src/content/work' }),
+  loader: glob({ pattern: '**/*.md', base: './src/content/work' }),
   schema: z.object({
     title: z.string(),
     company: z.string(),
@@ -21,11 +24,13 @@ const work = defineCollection({
   }),
 })
 
-// One Markdown file per project in src/content/projects/. Fields mirror
-// docs/portfolio-plan.md. Shown on /portfolio (grid + filter chips), the home
-// page (featured cards), and /portfolio/[slug] detail pages.
+// One Markdown file per project, under a locale subdir:
+// src/content/projects/<lang>/<slug>.md. Entry id is `<lang>/<slug>` (slug shared
+// across locales — see src/i18n/content.ts). Fields mirror docs/portfolio-plan.md.
+// Shown on /portfolio (grid + filter chips), the home page (featured cards), and
+// /portfolio/[slug] detail pages.
 const projects = defineCollection({
-  loader: glob({ pattern: '*.md', base: './src/content/projects' }),
+  loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
