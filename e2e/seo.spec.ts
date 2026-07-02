@@ -54,7 +54,13 @@ test('home page has a canonical link and Person + BreadcrumbList JSON-LD', async
   expect(person).toBeTruthy()
   expect(person?.name).toBe('Nicolas Zilli')
   expect(person?.sameAs).toEqual(
-    expect.arrayContaining(['https://github.com/nozil', 'https://www.linkedin.com/in/nicolaszilli'])
+    expect.arrayContaining([
+      'https://github.com/nozil',
+      'https://www.linkedin.com/in/nicolaszilli',
+      'https://www.malt.fr/profile/nicolaszilli',
+      'https://hashnode.com/@nozil',
+      'https://dev.to/nozil',
+    ])
   )
 
   expect(schemas.some((s) => s['@type'] === 'BreadcrumbList')).toBe(true)

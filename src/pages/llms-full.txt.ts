@@ -48,6 +48,9 @@ Links:
 - Website: https://nozil.dev
 - GitHub: https://github.com/nozil
 - LinkedIn: https://www.linkedin.com/in/nicolaszilli
+- Malt: https://www.malt.fr/profile/nicolaszilli
+- Hashnode: https://hashnode.com/@nozil
+- dev.to: https://dev.to/nozil
 - Contact: https://nozil.dev/contact`)
 
   sections.push(`## Skills

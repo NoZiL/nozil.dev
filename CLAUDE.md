@@ -92,6 +92,9 @@ Every page's nav and footer must link to:
 
 - `https://github.com/nozil`
 - `https://www.linkedin.com/in/nicolaszilli`
+- `https://www.malt.fr/profile/nicolaszilli`
+- `https://hashnode.com/@nozil`
+- `https://dev.to/nozil`
 - Email address via JS reveal button (no `mailto:` in HTML — see contact-plan.md)
 
 ## Contacts

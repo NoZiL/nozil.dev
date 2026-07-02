@@ -88,4 +88,7 @@ Lead Mobile Engineer at Tennaxia · Freelance dev at nozil.dev · React Native &
 
 - GitHub: https://github.com/nozil
 - LinkedIn: https://www.linkedin.com/in/nicolaszilli
+- Malt: https://www.malt.fr/profile/nicolaszilli
+- Hashnode: https://hashnode.com/@nozil
+- dev.to: https://dev.to/nozil
 - Email: via contact form or JS-reveal on /contact (see docs/contact-plan.md)
