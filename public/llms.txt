@@ -28,6 +28,9 @@ Nicolas Zilli leads mobile engineering at Tennaxia, building field-first health,
 
 - GitHub: https://github.com/nozil
 - LinkedIn: https://www.linkedin.com/in/nicolaszilli
+- Malt: https://www.malt.fr/profile/nicolaszilli
+- Hashnode: https://hashnode.com/@nozil
+- dev.to: https://dev.to/nozil
 - Contact form: https://nozil.dev/contact
 
 ## Optional

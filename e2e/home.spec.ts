@@ -39,6 +39,10 @@ test('nav and CTA links point to the right routes', async ({ page }) => {
   await expect(nav.getByRole('link', { name: 'Work' })).toHaveAttribute('href', '/work')
   await expect(nav.getByRole('link', { name: 'Portfolio' })).toHaveAttribute('href', '/portfolio')
   await expect(nav.getByRole('link', { name: 'Contact' })).toHaveAttribute('href', '/contact')
+  await expect(nav.getByRole('link', { name: 'Hire me' })).toHaveAttribute(
+    'href',
+    'https://www.malt.fr/profile/nicolaszilli'
+  )
 
   await expect(page.getByRole('link', { name: 'View CV' })).toHaveAttribute('href', '/work')
   await expect(page.getByRole('link', { name: 'See portfolio' })).toHaveAttribute('href', '/portfolio')
@@ -76,6 +80,12 @@ test('footer has the required backlinks and colophon', async ({ page }) => {
     'href',
     'https://www.linkedin.com/in/nicolaszilli'
   )
+  await expect(footer.getByRole('link', { name: 'Malt' })).toHaveAttribute(
+    'href',
+    'https://www.malt.fr/profile/nicolaszilli'
+  )
+  await expect(footer.getByRole('link', { name: 'Hashnode' })).toHaveAttribute('href', 'https://hashnode.com/@nozil')
+  await expect(footer.getByRole('link', { name: 'dev.to' })).toHaveAttribute('href', 'https://dev.to/nozil')
   await expect(footer.getByText(/Built with/)).toBeVisible()
 })
 
@@ -99,7 +109,7 @@ test('og and rel=me meta tags are present', async ({ page }) => {
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /Nicolas Zilli/)
   await expect(page.locator('meta[property="og:description"]')).toHaveAttribute('content', /.+/)
   await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', 'https://nozil.dev/')
-  await expect(page.locator('link[rel="me"]')).toHaveCount(2)
+  await expect(page.locator('link[rel="me"]')).toHaveCount(5)
 })
 
 // Runs in both projects; on Pixel 7 this is the layout-critical mobile gate
@@ -115,4 +125,6 @@ test('no horizontal overflow and nav stays usable', async ({ page }) => {
   const nav = page.getByRole('navigation', { name: 'Main' })
   await expect(nav.getByRole('link', { name: 'Work' })).toBeVisible()
   await expect(nav.getByRole('button', { name: 'Toggle dark mode' })).toBeVisible()
+  // "Hire me" collapses to an icon-only button below sm — same accessible name either way.
+  await expect(nav.getByRole('link', { name: 'Hire me' })).toBeVisible()
 })
