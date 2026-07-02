@@ -44,6 +44,11 @@ const fmt = (d: Date) => d.toLocaleDateString(dateLocale, { month: 'short', year
 
 const typeLabel = t.work.typeLabel
 
+// Locale-specific downloads: hand-curated résumé + build-time PDF snapshot,
+// both per docs/cv-plan.md.
+const docxHref = lang === 'fr' ? '/nicolas_zilli_cv_fr.docx' : '/nicolas_zilli_resume_intl.docx'
+const pdfHref = lang === 'fr' ? '/cv_fr.pdf' : '/cv.pdf'
+
 // Skills taxonomy — mirrors the CV (public/nicolas_zilli_resume_intl.pdf).
 const skillGroups = [
   {
@@ -122,9 +127,9 @@ const education: Education[] = [
     </h1>
     <div class="flex flex-wrap items-center gap-2" data-print-hide>
       {/* Primary: hand-curated 1-page résumé (static, always available). */}
-      <ButtonLink href="/nicolas_zilli_resume_intl.docx" download variant="primary">{t.work.downloadDocx}</ButtonLink>
+      <ButtonLink href={docxHref} download variant="primary">{t.work.downloadDocx}</ButtonLink>
       {/* Secondary: build-time PDF snapshot of this page. */}
-      <ButtonLink href="/cv.pdf" download variant="outline">{t.work.downloadPdf}</ButtonLink>
+      <ButtonLink href={pdfHref} download variant="outline">{t.work.downloadPdf}</ButtonLink>
     </div>
   </section>
 

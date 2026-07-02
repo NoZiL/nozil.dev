@@ -33,6 +33,18 @@ test('French sub-pages render their localized headings', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Tous' })).toBeVisible()
 })
 
+test('French CV download CTAs point at the French DOCX + PDF', async ({ page }) => {
+  await page.goto('/fr/work')
+
+  const docx = page.getByRole('link', { name: 'Télécharger le CV (DOCX)' })
+  await expect(docx).toHaveAttribute('href', '/nicolas_zilli_cv_fr.docx')
+  await expect(docx).toHaveAttribute('download')
+
+  const pdf = page.getByRole('link', { name: 'Télécharger en PDF' })
+  await expect(pdf).toHaveAttribute('href', '/cv_fr.pdf')
+  await expect(pdf).toHaveAttribute('download')
+})
+
 test('work and project entries are translated per locale', async ({ page }) => {
   // The collection bodies live in locale-specific Markdown (work/<lang>/,
   // projects/<lang>/) — the FR pages must render French, the EN pages English.
